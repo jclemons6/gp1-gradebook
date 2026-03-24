@@ -501,728 +501,738 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
 <div class="toast" id="toast"></div>
 
 <!-- FIREBASE -->
+<!-- Firebase SDK — module only for imports, exposes db to window -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyALx4avYOancxV5O96Ps5FM-6b8IGPhXK8",
-  authDomain: "gp1-gradebook.firebaseapp.com",
-  databaseURL: "https://gp1-gradebook-default-rtdb.firebaseio.com",
-  projectId: "gp1-gradebook",
-  storageBucket: "gp1-gradebook.firebasestorage.app",
-  messagingSenderId: "984231332046",
-  appId: "1:984231332046:web:b5b5d9fbae86f85427689f"
-};
-
-const app = initializeApp(firebaseConfig);
+import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+const app = initializeApp({
+  apiKey:"AIzaSyALx4avYOancxV5O96Ps5FM-6b8IGPhXK8",
+  authDomain:"gp1-gradebook.firebaseapp.com",
+  databaseURL:"https://gp1-gradebook-default-rtdb.firebaseio.com",
+  projectId:"gp1-gradebook",
+  storageBucket:"gp1-gradebook.firebasestorage.app",
+  messagingSenderId:"984231332046",
+  appId:"1:984231332046:web:b5b5d9fbae86f85427689f"
+});
 const db = getDatabase(app);
-window._db = db;
-window._dbRef = ref;
-window._dbSet = set;
-window._dbGet = get;
-window._dbOnValue = onValue;
-window._dbUpdate = update;
+window._FB = { db, ref, set, get, onValue };
+window.dispatchEvent(new Event("fbReady"));
+</script>
 
-// ===================== DEFAULT DATA =====================
-const DEFAULT_ASSIGNMENTS = [
-  {id:"a1",name:"BSA",max:50,cat:"Core",link:"",linkLabel:""},
-  {id:"a2",name:"P&L",max:50,cat:"Core",link:"",linkLabel:""},
-  {id:"a3",name:"Reporting",max:50,cat:"Core",link:"",linkLabel:""},
-  {id:"a4",name:"Daily Tools",max:50,cat:"Core",link:"",linkLabel:""},
-  {id:"a5",name:"Disposition",max:50,cat:"Core",link:"",linkLabel:""},
-];
+<!-- Main app — regular script, waits for fbReady -->
+<script>
+window.addEventListener("fbReady", function() {
+  const { db, ref, set, get, onValue } = window._FB;
 
-const DEFAULT_STUDENTS = [
-  {id:"st1",name:"Aaron Lozano",branch:"1011",bm:"Tony Leo",sup:"Sindy Hernandez",pw:"6195",removed:false,grades:{a1:50,a2:45,a3:0,a4:50,a5:45},att:{}},
-  {id:"st2",name:"Alene Mckissick",branch:"135",bm:"Jared Messersmith",sup:"Ron Coker",pw:"8688",removed:false,grades:{a1:50,a2:45,a3:0,a4:45,a5:30},att:{}},
-  {id:"st3",name:"Amber Gallegos",branch:"1502",bm:"Raeda Issa/Tanya Goldstein",sup:"Lynn Tyrakowski",pw:"2617",removed:false,grades:{a1:50,a2:45,a3:0,a4:50,a5:40},att:{}},
-  {id:"st4",name:"Amy Taylor",branch:"101",bm:"Ronda Class",sup:"Jon Singer",pw:"6115",removed:false,grades:{a1:50,a2:50,a3:0,a4:50,a5:50},att:{}},
-  {id:"st5",name:"Ana Aguilar",branch:"2104",bm:"Jeanette Cuadras",sup:"Chuck Glussman",pw:"5836",removed:false,grades:{a1:44,a2:50,a3:0,a4:50,a5:30},att:{}},
-  {id:"st6",name:"Ana Garza",branch:"557",bm:"Monica De Leon",sup:"Mariana Ibarra",pw:"4650",removed:false,grades:{a1:39,a2:45,a3:0,a4:40,a5:30},att:{}},
-  {id:"st7",name:"Arely Herrera",branch:"510",bm:"Danya Lozano",sup:"Carlos Garcia",pw:"9022",removed:false,grades:{a1:45,a2:50,a3:0,a4:35,a5:35},att:{}},
-  {id:"st8",name:"Ashley Thomas",branch:"1111",bm:"Stacey Chambless",sup:"Debbie Sanders",pw:"9306",removed:false,grades:{a1:45,a2:45,a3:0,a4:35,a5:40},att:{}},
-  {id:"st9",name:"Austin Jones",branch:"1108",bm:"Kambai Barclay",sup:"Debbie Sanders",pw:"5183",removed:false,grades:{a1:50,a2:50,a3:0,a4:40,a5:40},att:{}},
-  {id:"st10",name:"Carrie Turner",branch:"523",bm:"Antonayia Shropshire/Gerry Salas",sup:"Nick Hoff",pw:"3134",removed:false,grades:{a1:50,a2:50,a3:0,a4:50,a5:20},att:{}},
-  {id:"st11",name:"Christina Moore",branch:"582",bm:"Brigette Garza",sup:"Nick Miaoulis",pw:"4863",removed:false,grades:{a1:50,a2:45,a3:0,a4:45,a5:40},att:{}},
-  {id:"st12",name:"Cynthia Lewis",branch:"",bm:"",sup:"",pw:"7126",removed:false,grades:{a1:0,a2:0,a3:0,a4:0,a5:0},att:{}},
-  {id:"st13",name:"Elizabeth Garcia",branch:"544",bm:"Bonnie Campbell",sup:"Fernando Varela",pw:"8190",removed:false,grades:{a1:50,a2:50,a3:0,a4:40,a5:40},att:{}},
-  {id:"st14",name:"Francisco Lares",branch:"2106",bm:"Joel Zarate",sup:"John Romero",pw:"5779",removed:false,grades:{a1:45,a2:50,a3:0,a4:45,a5:45},att:{}},
-  {id:"st15",name:"Ginger Gonzalez",branch:"516",bm:"Melissa Ballesteros",sup:"Nick Miaoulis",pw:"5139",removed:false,grades:{a1:0,a2:50,a3:0,a4:40,a5:0},att:{}},
-  {id:"st16",name:"Gustavo Hernandez Lara",branch:"",bm:"",sup:"",pw:"6785",removed:false,grades:{a1:0,a2:0,a3:0,a4:0,a5:0},att:{}},
-  {id:"st17",name:"Gwen Jenkins",branch:"815",bm:"Olivia Howard",sup:"Heather Jones",pw:"6641",removed:false,grades:{a1:50,a2:35,a3:0,a4:0,a5:20},att:{}},
-  {id:"st18",name:"Jaime Anaya Raya",branch:"2108",bm:"Carlos Olivarez/Melissa Aguilera",sup:"Michael Mathewson",pw:"7348",removed:false,grades:{a1:50,a2:40,a3:0,a4:45,a5:50},att:{}},
-  {id:"st19",name:"Jakob Cervantes",branch:"1005",bm:"Shandora Allen",sup:"Sindy Hernandez",pw:"2350",removed:false,grades:{a1:44,a2:40,a3:0,a4:40,a5:0},att:{}},
-  {id:"st20",name:"Johanna Arana",branch:"414",bm:"Esmael Guerra",sup:"Mariana Ibarra",pw:"4571",removed:false,grades:{a1:50,a2:40,a3:0,a4:45,a5:50},att:{}},
-  {id:"st21",name:"Karen Thomas",branch:"1701",bm:"Jose Rivas/Kathy Dietz Smith",sup:"Chip Burdick",pw:"9431",removed:false,grades:{a1:39,a2:50,a3:0,a4:45,a5:45},att:{}},
-  {id:"st22",name:"Martha Santos",branch:"2101",bm:"Karie Avalos/Markus Hines",sup:"John Romero",pw:"8123",removed:false,grades:{a1:45,a2:45,a3:0,a4:40,a5:25},att:{}},
-  {id:"st23",name:"Monica Crew",branch:"1402",bm:"Emily Conrad",sup:"Amber Zahringer",pw:"9992",removed:false,grades:{a1:50,a2:45,a3:0,a4:0,a5:40},att:{}},
-  {id:"st24",name:"Rasha Tyler",branch:"1209",bm:"Jade Hill",sup:"Amanda Goins",pw:"4372",removed:false,grades:{a1:45,a2:45,a3:0,a4:0,a5:45},att:{}},
-  {id:"st25",name:"Ruth Garcia",branch:"",bm:"",sup:"",pw:"7569",removed:false,grades:{a1:0,a2:0,a3:0,a4:0,a5:0},att:{}},
-  {id:"st26",name:"Sandy Puente",branch:"907",bm:"Christy Taylor",sup:"Krystle Foster",pw:"5580",removed:false,grades:{a1:50,a2:50,a3:0,a4:50,a5:30},att:{}},
-  {id:"st27",name:"Shatiana Hill",branch:"670",bm:"Michelle Copeland",sup:"Angela Evans",pw:"1643",removed:false,grades:{a1:45,a2:50,a3:0,a4:45,a5:45},att:{}},
-  {id:"st28",name:"Shontario Roland",branch:"126",bm:"Doretha Adidarko",sup:"Travis Hoppe",pw:"5354",removed:false,grades:{a1:0,a2:45,a3:0,a4:40,a5:30},att:{}},
-  {id:"st29",name:"Vince Williams",branch:"1505",bm:"Tashianna Bush/Carla Batrez",sup:"Lynn Tyrakowski",pw:"2639",removed:false,grades:{a1:50,a2:50,a3:0,a4:40,a5:35},att:{}},
-  {id:"st30",name:"Zoie Tahseen",branch:"1202",bm:"Ana Espaillat Gonzalez",sup:"Alfred Horn",pw:"3204",removed:false,grades:{a1:45,a2:50,a3:0,a4:45,a5:50},att:{}},
-];
+  // ===================== DEFAULTS =====================
+  const DEF_ASSIGNS = [
+    {id:"a1",name:"BSA",max:50,cat:"Core",link:"",linkLabel:""},
+    {id:"a2",name:"P&L",max:50,cat:"Core",link:"",linkLabel:""},
+    {id:"a3",name:"Reporting",max:50,cat:"Core",link:"",linkLabel:""},
+    {id:"a4",name:"Daily Tools",max:50,cat:"Core",link:"",linkLabel:""},
+    {id:"a5",name:"Disposition",max:50,cat:"Core",link:"",linkLabel:""},
+  ];
+  const DEF_STUDENTS = [
+    {id:"st1",name:"Aaron Lozano",branch:"1011",bm:"Tony Leo",sup:"Sindy Hernandez",pw:"6195",removed:false,grades:{a1:50,a2:45,a3:0,a4:50,a5:45},att:{}},
+    {id:"st2",name:"Alene Mckissick",branch:"135",bm:"Jared Messersmith",sup:"Ron Coker",pw:"8688",removed:false,grades:{a1:50,a2:45,a3:0,a4:45,a5:30},att:{}},
+    {id:"st3",name:"Amber Gallegos",branch:"1502",bm:"Raeda Issa/Tanya Goldstein",sup:"Lynn Tyrakowski",pw:"2617",removed:false,grades:{a1:50,a2:45,a3:0,a4:50,a5:40},att:{}},
+    {id:"st4",name:"Amy Taylor",branch:"101",bm:"Ronda Class",sup:"Jon Singer",pw:"6115",removed:false,grades:{a1:50,a2:50,a3:0,a4:50,a5:50},att:{}},
+    {id:"st5",name:"Ana Aguilar",branch:"2104",bm:"Jeanette Cuadras",sup:"Chuck Glussman",pw:"5836",removed:false,grades:{a1:44,a2:50,a3:0,a4:50,a5:30},att:{}},
+    {id:"st6",name:"Ana Garza",branch:"557",bm:"Monica De Leon",sup:"Mariana Ibarra",pw:"4650",removed:false,grades:{a1:39,a2:45,a3:0,a4:40,a5:30},att:{}},
+    {id:"st7",name:"Arely Herrera",branch:"510",bm:"Danya Lozano",sup:"Carlos Garcia",pw:"9022",removed:false,grades:{a1:45,a2:50,a3:0,a4:35,a5:35},att:{}},
+    {id:"st8",name:"Ashley Thomas",branch:"1111",bm:"Stacey Chambless",sup:"Debbie Sanders",pw:"9306",removed:false,grades:{a1:45,a2:45,a3:0,a4:35,a5:40},att:{}},
+    {id:"st9",name:"Austin Jones",branch:"1108",bm:"Kambai Barclay",sup:"Debbie Sanders",pw:"5183",removed:false,grades:{a1:50,a2:50,a3:0,a4:40,a5:40},att:{}},
+    {id:"st10",name:"Carrie Turner",branch:"523",bm:"Antonayia Shropshire/Gerry Salas",sup:"Nick Hoff",pw:"3134",removed:false,grades:{a1:50,a2:50,a3:0,a4:50,a5:20},att:{}},
+    {id:"st11",name:"Christina Moore",branch:"582",bm:"Brigette Garza",sup:"Nick Miaoulis",pw:"4863",removed:false,grades:{a1:50,a2:45,a3:0,a4:45,a5:40},att:{}},
+    {id:"st12",name:"Cynthia Lewis",branch:"",bm:"",sup:"",pw:"7126",removed:false,grades:{a1:0,a2:0,a3:0,a4:0,a5:0},att:{}},
+    {id:"st13",name:"Elizabeth Garcia",branch:"544",bm:"Bonnie Campbell",sup:"Fernando Varela",pw:"8190",removed:false,grades:{a1:50,a2:50,a3:0,a4:40,a5:40},att:{}},
+    {id:"st14",name:"Francisco Lares",branch:"2106",bm:"Joel Zarate",sup:"John Romero",pw:"5779",removed:false,grades:{a1:45,a2:50,a3:0,a4:45,a5:45},att:{}},
+    {id:"st15",name:"Ginger Gonzalez",branch:"516",bm:"Melissa Ballesteros",sup:"Nick Miaoulis",pw:"5139",removed:false,grades:{a1:0,a2:50,a3:0,a4:40,a5:0},att:{}},
+    {id:"st16",name:"Gustavo Hernandez Lara",branch:"",bm:"",sup:"",pw:"6785",removed:false,grades:{a1:0,a2:0,a3:0,a4:0,a5:0},att:{}},
+    {id:"st17",name:"Gwen Jenkins",branch:"815",bm:"Olivia Howard",sup:"Heather Jones",pw:"6641",removed:false,grades:{a1:50,a2:35,a3:0,a4:0,a5:20},att:{}},
+    {id:"st18",name:"Jaime Anaya Raya",branch:"2108",bm:"Carlos Olivarez/Melissa Aguilera",sup:"Michael Mathewson",pw:"7348",removed:false,grades:{a1:50,a2:40,a3:0,a4:45,a5:50},att:{}},
+    {id:"st19",name:"Jakob Cervantes",branch:"1005",bm:"Shandora Allen",sup:"Sindy Hernandez",pw:"2350",removed:false,grades:{a1:44,a2:40,a3:0,a4:40,a5:0},att:{}},
+    {id:"st20",name:"Johanna Arana",branch:"414",bm:"Esmael Guerra",sup:"Mariana Ibarra",pw:"4571",removed:false,grades:{a1:50,a2:40,a3:0,a4:45,a5:50},att:{}},
+    {id:"st21",name:"Karen Thomas",branch:"1701",bm:"Jose Rivas/Kathy Dietz Smith",sup:"Chip Burdick",pw:"9431",removed:false,grades:{a1:39,a2:50,a3:0,a4:45,a5:45},att:{}},
+    {id:"st22",name:"Martha Santos",branch:"2101",bm:"Karie Avalos/Markus Hines",sup:"John Romero",pw:"8123",removed:false,grades:{a1:45,a2:45,a3:0,a4:40,a5:25},att:{}},
+    {id:"st23",name:"Monica Crew",branch:"1402",bm:"Emily Conrad",sup:"Amber Zahringer",pw:"9992",removed:false,grades:{a1:50,a2:45,a3:0,a4:0,a5:40},att:{}},
+    {id:"st24",name:"Rasha Tyler",branch:"1209",bm:"Jade Hill",sup:"Amanda Goins",pw:"4372",removed:false,grades:{a1:45,a2:45,a3:0,a4:0,a5:45},att:{}},
+    {id:"st25",name:"Ruth Garcia",branch:"",bm:"",sup:"",pw:"7569",removed:false,grades:{a1:0,a2:0,a3:0,a4:0,a5:0},att:{}},
+    {id:"st26",name:"Sandy Puente",branch:"907",bm:"Christy Taylor",sup:"Krystle Foster",pw:"5580",removed:false,grades:{a1:50,a2:50,a3:0,a4:50,a5:30},att:{}},
+    {id:"st27",name:"Shatiana Hill",branch:"670",bm:"Michelle Copeland",sup:"Angela Evans",pw:"1643",removed:false,grades:{a1:45,a2:50,a3:0,a4:45,a5:45},att:{}},
+    {id:"st28",name:"Shontario Roland",branch:"126",bm:"Doretha Adidarko",sup:"Travis Hoppe",pw:"5354",removed:false,grades:{a1:0,a2:45,a3:0,a4:40,a5:30},att:{}},
+    {id:"st29",name:"Vince Williams",branch:"1505",bm:"Tashianna Bush/Carla Batrez",sup:"Lynn Tyrakowski",pw:"2639",removed:false,grades:{a1:50,a2:50,a3:0,a4:40,a5:35},att:{}},
+    {id:"st30",name:"Zoie Tahseen",branch:"1202",bm:"Ana Espaillat Gonzalez",sup:"Alfred Horn",pw:"3204",removed:false,grades:{a1:45,a2:50,a3:0,a4:45,a5:50},att:{}},
+  ];
 
-// ===================== STATE =====================
-let classes = {};
-let activeClassId = "c1";
-let adminPw = "admin2026";
-let _editStuId = null, _editAssignId = null, _editSesId = null, _curStuId = null;
-let _sortByGrade = false;
-let _savingTimer = null;
-window._classes = classes;
-window._getActiveClass = ()=> classes[activeClassId];
+  // ===================== STATE =====================
+  var classes = {};
+  var activeClassId = "c1";
+  var adminPw = "admin2026";
+  var _editStuId = null, _editAssignId = null, _editSesId = null, _curStuId = null;
+  var _sortByGrade = false;
+  var _saveTimer = null;
 
-// ===================== FIREBASE INIT =====================
-async function initFirebase() {
+  // ===================== HELPERS =====================
+  function uid(){ return "id_"+Math.random().toString(36).slice(2,9); }
+  function cls(){ return classes[activeClassId]; }
+  function getStudents(){ return objToArr(cls()&&cls().students); }
+  function getAssigns(){ return objToArr(cls()&&cls().assignments); }
+  function getSessions(){ return objToArr(cls()&&cls().sessions).sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); }); }
+  function objToArr(o){ return o?Object.values(o):[]; }
+  function arrToObj(arr){ var o={}; arr.forEach(function(x){ o[x.id]=x; }); return o; }
+  function getTotal(stu,assigns){ return assigns.reduce(function(s,a){ return s+(isNaN(stu.grades&&stu.grades[a.id])?0:Number(stu.grades[a.id])); },0); }
+  function getMax(assigns){ return assigns.reduce(function(s,a){ return s+a.max; },0); }
+  function getPct(stu,assigns){ var mx=getMax(assigns); return mx?getTotal(stu,assigns)/mx:0; }
+  function absences(stu,sessions){ return sessions.filter(function(s){ return (stu.att&&stu.att[s.id])==="A"; }).length; }
+  function gradeColor(p){ return p>=.80?"#10b981":p>=.60?"#38bdf8":p>=.40?"#f59e0b":"#ef4444"; }
+  function barColor(p){ return p>=.85?"#10b981":p>=.70?"#38bdf8":p>=.50?"#f59e0b":"#ef4444"; }
+  function attColor(s){ return s==="P"?"#10b981":s==="A"?"#ef4444":"#f59e0b"; }
+  function attLabel(s){ return s==="P"?"Present":s==="A"?"Absent":"Excused"; }
+  function getTop3(students,assigns){
+    return students.filter(function(s){ return !s.removed; })
+      .sort(function(a,b){ return getPct(b,assigns)-getPct(a,assigns); })
+      .slice(0,3).map(function(s){ return s.id; });
+  }
+  function el(id){ return document.getElementById(id); }
+  function showToast(msg,type){
+    var t=el("toast"); t.textContent=msg;
+    t.className="toast "+(type||"ok")+" show";
+    setTimeout(function(){ t.classList.remove("show"); },3200);
+  }
+  function switchScreen(id){
+    document.querySelectorAll(".screen").forEach(function(s){ s.classList.remove("active"); });
+    el(id).classList.add("active");
+  }
+  function openModal(id){ el(id).classList.add("open"); }
+  function closeAll(){ document.querySelectorAll(".overlay").forEach(function(o){ o.classList.remove("open"); }); }
+
+  // ===================== FIREBASE =====================
+  function setFbStatus(s){
+    ["fbStatusStu","fbStatusAdm"].forEach(function(id){
+      var e=el(id); if(!e) return;
+      e.className="fb-status "+(s==="ok"?"fb-ok":s==="err"?"fb-err":"fb-loading");
+      e.textContent=s==="ok"?"✓ Synced":s==="err"?"✗ Offline":"⟳ Syncing";
+    });
+  }
+
+  function scheduleSave(){
+    clearTimeout(_saveTimer);
+    _saveTimer=setTimeout(function(){
+      setFbStatus("loading");
+      set(ref(db,"/"), {classes:classes, adminPw:adminPw})
+        .then(function(){ setFbStatus("ok"); })
+        .catch(function(){ setFbStatus("err"); showToast("Save failed","bad"); });
+    }, 800);
+  }
+
+  // Init Firebase data
   setFbStatus("loading");
-  try {
-    const snap = await _dbGet(_dbRef(_db, "/"));
-    if (snap.exists()) {
-      const data = snap.val();
-      if (data.classes) Object.assign(classes, data.classes);
-      if (data.adminPw) adminPw = data.adminPw;
+  get(ref(db,"/")).then(function(snap){
+    if(snap.exists()){
+      var data=snap.val();
+      if(data.classes){ Object.keys(classes).forEach(function(k){ delete classes[k]; }); Object.assign(classes,data.classes); }
+      if(data.adminPw) adminPw=data.adminPw;
     } else {
-      // First run — seed default data
-      classes["c1"] = {
-        id:"c1", name:"GP1 – 2026 Cohort 1", start:"2026-01-06", end:"2026-06-30",
-        assignments: arrToObj(JSON.parse(JSON.stringify(DEFAULT_ASSIGNMENTS))),
-        sessions: {},
-        students: arrToObj(JSON.parse(JSON.stringify(DEFAULT_STUDENTS)))
+      classes["c1"]={
+        id:"c1",name:"GP1 – 2026 Cohort 1",start:"2026-01-06",end:"2026-06-30",
+        assignments:arrToObj(JSON.parse(JSON.stringify(DEF_ASSIGNS))),
+        sessions:{},
+        students:arrToObj(JSON.parse(JSON.stringify(DEF_STUDENTS)))
       };
-      await _dbSet(_dbRef(_db,"/"), {classes, adminPw});
+      set(ref(db,"/"), {classes:classes, adminPw:adminPw});
     }
     setFbStatus("ok");
     buildLoginUI();
-    // Live listener
-    _dbOnValue(_dbRef(_db,"/"), snap2 => {
-      if(!snap2.exists()) return;
-      const d = snap2.val();
-      if(d.classes) { Object.keys(classes).forEach(k=>delete classes[k]); Object.assign(classes,d.classes); }
-      if(d.adminPw) adminPw = d.adminPw;
-      if(document.getElementById("adminScreen").classList.contains("active")) renderAll();
+    // Live sync
+    onValue(ref(db,"/"), function(s2){
+      if(!s2.exists()) return;
+      var d=s2.val();
+      if(d.classes){ Object.keys(classes).forEach(function(k){ delete classes[k]; }); Object.assign(classes,d.classes); }
+      if(d.adminPw) adminPw=d.adminPw;
+      if(el("adminScreen").classList.contains("active")) renderAll();
+      if(el("studentScreen").classList.contains("active") && _curStuId) showStudent();
     });
-  } catch(e) {
+  }).catch(function(e){
     console.error(e);
     setFbStatus("err");
-    showToast("Firebase connection failed. Check your internet.","bad");
-    // Fall back to local default
-    classes["c1"] = {
-      id:"c1", name:"GP1 – 2026 Cohort 1", start:"2026-01-06", end:"2026-06-30",
-      assignments: arrToObj(JSON.parse(JSON.stringify(DEFAULT_ASSIGNMENTS))),
-      sessions: {},
-      students: arrToObj(JSON.parse(JSON.stringify(DEFAULT_STUDENTS)))
-    };
+    showToast("Firebase offline — running locally","warn");
+    classes["c1"]={id:"c1",name:"GP1 – 2026 Cohort 1",start:"2026-01-06",end:"2026-06-30",
+      assignments:arrToObj(JSON.parse(JSON.stringify(DEF_ASSIGNS))),sessions:{},
+      students:arrToObj(JSON.parse(JSON.stringify(DEF_STUDENTS)))};
     buildLoginUI();
-  }
-}
-
-function setFbStatus(s) {
-  ["fbStatusStu","fbStatusAdm"].forEach(id=>{
-    const el = document.getElementById(id);
-    if(!el) return;
-    el.className = "fb-status " + (s==="ok"?"fb-ok":s==="err"?"fb-err":"fb-loading");
-    el.textContent = s==="ok"?"✓ Synced":s==="err"?"✗ Offline":"⟳ Syncing";
   });
-}
 
-async function saveToFirebase(path, data) {
-  setFbStatus("loading");
-  try {
-    await _dbSet(_dbRef(_db, path), data);
-    setFbStatus("ok");
-  } catch(e) {
-    setFbStatus("err");
-    showToast("Save failed — check internet","bad");
+  // ===================== LOGIN =====================
+  function buildLoginUI(){
+    var sel=el("loginClassSel");
+    sel.innerHTML=Object.values(classes).map(function(c){
+      return '<option value="'+c.id+'">'+c.name+'</option>';
+    }).join("");
+    populateNames();
   }
-}
 
-function scheduleSave() {
-  clearTimeout(_savingTimer);
-  _savingTimer = setTimeout(()=> saveToFirebase("/", {classes, adminPw}), 800);
-}
+  function populateNames(){
+    var cid=el("loginClassSel").value;
+    var cl=classes[cid];
+    var sel=el("nameSelect");
+    sel.innerHTML='<option value="">— Select your name —</option>'+
+      objToArr(cl&&cl.students).filter(function(s){ return !s.removed; })
+      .map(function(s){ return '<option value="'+s.id+'|'+cid+'">'+s.name+'</option>'; }).join("");
+  }
 
-// ===================== HELPERS =====================
-function arrToObj(arr) {
-  const o = {};
-  arr.forEach(x => o[x.id] = x);
-  return o;
-}
-function objToArr(o) { return o ? Object.values(o) : []; }
-function uid() { return "id_"+Math.random().toString(36).slice(2,9); }
-function cls() { return classes[activeClassId]; }
-function getStudents() { return objToArr(cls()?.students); }
-function getAssigns() { return objToArr(cls()?.assignments); }
-function getSessions() { return objToArr(cls()?.sessions); }
-function getTotal(stu,assigns) { return assigns.reduce((s,a)=>s+(isNaN(stu.grades?.[a.id])?0:Number(stu.grades[a.id])),0); }
-function getMax(assigns) { return assigns.reduce((s,a)=>s+a.max,0); }
-function getPct(stu,assigns) { const mx=getMax(assigns); return mx?getTotal(stu,assigns)/mx:0; }
-function absences(stu,sessions) { return sessions.filter(s=>(stu.att||{})[s.id]==="A").length; }
-function gradeColor(p) { return p>=.80?"#10b981":p>=.60?"#38bdf8":p>=.40?"#f59e0b":"#ef4444"; }
-function barColor(p) { return p>=.85?"#10b981":p>=.70?"#38bdf8":p>=.50?"#f59e0b":"#ef4444"; }
-function attColor(s) { return s==="P"?"#10b981":s==="A"?"#ef4444":"#f59e0b"; }
-function attLabel(s) { return s==="P"?"Present":s==="A"?"Absent":"Excused"; }
-function getTop3(students, assigns) {
-  return students.filter(s=>!s.removed).sort((a,b)=>getPct(b,assigns)-getPct(a,assigns)).slice(0,3).map(s=>s.id);
-}
+  function handleLogin(){
+    var val=el("nameSelect").value;
+    var pw=el("passwordInput").value.trim();
+    var errEl=el("errMsg");
+    if(pw===adminPw){ showAdmin(); return; }
+    if(!val){ errEl.textContent="Please select your name."; errEl.style.display="block"; return; }
+    var parts=val.split("|"); var sid=parts[0]; var cid=parts[1];
+    activeClassId=cid;
+    var stu=classes[cid]&&classes[cid].students&&classes[cid].students[sid];
+    if(!stu){ errEl.textContent="Student not found."; errEl.style.display="block"; return; }
+    if(String(pw)===String(stu.pw)){
+      errEl.style.display="none"; _curStuId=sid; showStudent();
+    } else {
+      errEl.textContent="Incorrect password. Please try again."; errEl.style.display="block";
+    }
+  }
 
-// ===================== LOGIN UI =====================
-function buildLoginUI() {
-  const sel = document.getElementById("loginClassSel");
-  sel.innerHTML = Object.values(classes).map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
-  sel.onchange = populateNames;
-  populateNames();
-}
+  // ===================== STUDENT VIEW =====================
+  function showStudent(){
+    switchScreen("studentScreen");
+    var cl=cls(); var assigns=getAssigns(); var sessions=getSessions();
+    var stu=cl.students[_curStuId]; if(!stu) return;
+    var total=getTotal(stu,assigns), mx=getMax(assigns), pct=mx?total/mx:0;
+    var top3=getTop3(getStudents(),assigns);
+    var rankPos=top3.indexOf(stu.id);
+    var initials=stu.name.split(" ").map(function(w){ return w[0]; }).join("").slice(0,2).toUpperCase();
+    el("topName").textContent=stu.name;
+    el("stuAvatar").textContent=initials;
+    el("stuName").textContent=stu.name;
+    el("stuMeta1").innerHTML='<span>🏢 Branch: <strong>'+(stu.branch||"N/A")+'</strong></span><span>👤 BM: <strong>'+(stu.bm||"N/A")+'</strong></span>';
+    el("stuMeta2").innerHTML='<span>👔 Supervisor: <strong>'+(stu.sup||"N/A")+'</strong></span><span class="info-chip">📚 '+cl.name+'</span>';
+    el("stuScoreBig").textContent=total;
+    el("stuScoreBig").style.color=gradeColor(pct);
+    el("stuScoreLbl").textContent="out of "+mx+" pts";
+    var passing=pct>=0.80;
+    var srow=el("stuStatusRow");
+    var sh='<span class="pass-pill" style="background:'+(passing?"rgba(16,185,129,.18)":"rgba(239,68,68,.18)")+';color:'+(passing?"#10b981":"#ef4444")+';border:1px solid '+(passing?"rgba(16,185,129,.4)":"rgba(239,68,68,.4)")+'">'+(passing?"✓ Passing":"✗ Needs Improvement")+'</span>';
+    if(rankPos===0) sh+='<span class="top3-badge" style="background:rgba(245,158,11,.2);color:#f59e0b;border:1px solid rgba(245,158,11,.4)">🥇 Top of Class</span>';
+    else if(rankPos===1) sh+='<span class="top3-badge" style="background:rgba(148,163,184,.15);color:#94a3b8;border:1px solid rgba(148,163,184,.3)">🥈 #2 in Class</span>';
+    else if(rankPos===2) sh+='<span class="top3-badge" style="background:rgba(205,127,50,.15);color:#cd7f32;border:1px solid rgba(205,127,50,.3)">🥉 #3 in Class</span>';
+    srow.innerHTML=sh;
+    var abs=absences(stu,sessions);
+    var wb=el("attWarnBanner");
+    if(abs>=2){ wb.style.display="flex"; wb.className="att-warn att-danger"; wb.innerHTML='⚠️ <strong>You have '+abs+' unexcused absence'+(abs>1?"s":"")+'.</strong>&nbsp; 2 or more absences may result in removal from the program.'; }
+    else if(abs===1){ wb.style.display="flex"; wb.className="att-warn"; wb.innerHTML='📌 You have <strong>1 unexcused absence</strong>. A second absence may result in removal.'; }
+    else wb.style.display="none";
+    el("stuCards").innerHTML=assigns.map(function(a){ var v=(stu.grades&&stu.grades[a.id])||0; var c=barColor(a.max?v/a.max:0); return'<div class="sc"><div class="sc-lbl">'+a.name+'</div><div class="sc-val" style="color:'+c+'">'+v+'<span class="sc-max">/'+a.max+'</span></div></div>'; }).join("");
+    el("stuRows").innerHTML=assigns.map(function(a){ var v=(stu.grades&&stu.grades[a.id])||0; var p=a.max?v/a.max:0; var c=barColor(p); var lnk=a.link?'<a href="'+a.link+'" target="_blank" style="color:var(--accent);font-size:.78rem;margin-left:.5rem">🔗 '+(a.linkLabel||"View")+'</a>':""; return'<tr><td><span style="font-weight:600">'+a.name+'</span><span class="ar-badge" style="margin-left:.5rem">'+a.cat+'</span>'+lnk+'</td><td style="color:'+c+';font-weight:700">'+v+'</td><td style="color:var(--muted)">'+a.max+'</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:'+Math.round(p*100)+'%;background:'+c+'"></div></div><span class="bar-sc" style="color:'+c+'">'+Math.round(p*100)+'%</span></div></td></tr>'; }).join("")||'<tr><td colspan="4" class="empty">No assignments yet</td></tr>';
+    el("stuAttRows").innerHTML=sessions.length?sessions.map(function(s){ var st=(stu.att&&stu.att[s.id])||"P"; var c=attColor(st); return'<tr><td style="font-weight:600">'+s.name+'</td><td style="color:var(--muted)">'+(s.date||"—")+'</td><td><span class="g-pill" style="background:'+c+'22;color:'+c+';border:1px solid '+c+'44">'+attLabel(st)+'</span></td></tr>'; }).join(""):'<tr><td colspan="3" class="empty">No sessions recorded</td></tr>';
+  }
 
-function populateNames() {
-  const cid = document.getElementById("loginClassSel").value;
-  const cl = classes[cid];
-  const sel = document.getElementById("nameSelect");
-  sel.innerHTML = `<option value="">— Select your name —</option>` +
-    objToArr(cl?.students).filter(s=>!s.removed).map(s=>`<option value="${s.id}|${cid}">${s.name}</option>`).join("");
-}
+  // ===================== ADMIN =====================
+  function showAdmin(){
+    switchScreen("adminScreen");
+    buildAdmClassSel();
+    renderAll();
+  }
 
-// ===================== LOGIN =====================
-function handleLogin() {
-  const val = document.getElementById("nameSelect").value;
-  const pw = document.getElementById("passwordInput").value.trim();
-  const err = document.getElementById("errMsg");
-  if(pw === adminPw) { showAdmin(); return; }
-  if(!val) { err.textContent="Please select your name."; err.style.display="block"; return; }
-  const [sid,cid] = val.split("|");
-  activeClassId = cid;
-  const stu = classes[cid]?.students?.[sid];
-  if(!stu) return;
-  if(String(pw)===String(stu.pw)) { err.style.display="none"; _curStuId=sid; showStudent(); }
-  else { err.textContent="Incorrect password. Please try again."; err.style.display="block"; }
-}
+  function buildAdmClassSel(){
+    var sel=el("admClassSel");
+    sel.innerHTML=Object.values(classes).map(function(c){
+      return '<option value="'+c.id+'"'+(c.id===activeClassId?' selected':'')+'>'+c.name+'</option>';
+    }).join("");
+  }
 
-// ===================== STUDENT VIEW =====================
-function showStudent() {
-  switchScreen("studentScreen");
-  const cl = cls(); const assigns=getAssigns(); const sessions=getSessions();
-  const stu = cl.students[_curStuId];
-  if(!stu) return;
-  const total=getTotal(stu,assigns), mx=getMax(assigns), pct=mx?total/mx:0;
-  const top3=getTop3(getStudents(),assigns);
-  const rankPos=top3.indexOf(stu.id);
-  const initials=stu.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+  function renderAll(){
+    var cl=cls(); if(!cl) return;
+    var active=getStudents().filter(function(s){ return !s.removed; });
+    el("admSummary").textContent=cl.name+' · '+active.length+' active students · '+getAssigns().length+' assignments · '+getSessions().length+' sessions';
+    renderRoster();
+    renderAttendance();
+    renderAssignments();
+    renderAverages();
+    renderClasses();
+    el("rosterInfo").textContent=active.length+' active · '+getStudents().filter(function(s){ return s.removed; }).length+' removed';
+  }
 
-  document.getElementById("topName").textContent=stu.name;
-  document.getElementById("stuAvatar").textContent=initials;
-  document.getElementById("stuName").textContent=stu.name;
-  document.getElementById("stuMeta1").innerHTML=`<span>🏢 Branch: <strong>${stu.branch||"N/A"}</strong></span><span>👤 BM: <strong>${stu.bm||"N/A"}</strong></span>`;
-  document.getElementById("stuMeta2").innerHTML=`<span>👔 Supervisor: <strong>${stu.sup||"N/A"}</strong></span><span class="info-chip">📚 ${cl.name}</span>`;
-  document.getElementById("stuScoreBig").textContent=total;
-  document.getElementById("stuScoreBig").style.color=gradeColor(pct);
-  document.getElementById("stuScoreLbl").textContent=`out of ${mx} pts`;
+  // ===================== ROSTER =====================
+  function renderRoster(){
+    var assigns=getAssigns(); var sessions=getSessions();
+    var students=getStudents().slice();
+    var top3=getTop3(students,assigns);
+    if(_sortByGrade) students.sort(function(a,b){ return getPct(b,assigns)-getPct(a,assigns); });
+    el("rosterHead").innerHTML='<tr><th>Name</th><th>Branch</th>'+
+      assigns.map(function(a){ return'<th>'+a.name+'<br><span style="font-weight:400;color:var(--muted2)">/'+a.max+'</span></th>'; }).join("")+
+      '<th>Total</th><th>%</th><th>Abs</th><th>Pass</th><th>PW</th><th></th></tr>';
+    el("rosterBody").innerHTML=students.map(function(stu){
+      var total=getTotal(stu,assigns),mx=getMax(assigns),pct=mx?total/mx:0;
+      var rankPos=top3.indexOf(stu.id);
+      var abs=absences(stu,sessions);
+      var absColor=abs>=2?"#ef4444":abs===1?"#f59e0b":"#10b981";
+      var passing=pct>=0.80;
+      var rankClass=rankPos===0?"rank-1":rankPos===1?"rank-2":rankPos===2?"rank-3":"";
+      var rankHtml=rankPos>=0&&rankPos<=2?'<span class="rank-badge">'+["🥇","🥈","🥉"][rankPos]+'</span>':"";
+      return'<tr class="'+(stu.removed?"removed-row":"")+" "+rankClass+'">'+
+        '<td><span class="name-link" data-id="'+stu.id+'">'+rankHtml+stu.name+(stu.removed?'<span class="removed-tag" style="margin-left:.4rem">OUT</span>':'')+'</span></td>'+
+        '<td style="color:var(--muted)">'+(stu.branch||"—")+'</td>'+
+        assigns.map(function(a){ return'<td style="text-align:center">'+(stu.grades&&stu.grades[a.id]!==undefined?stu.grades[a.id]:0)+'</td>'; }).join("")+
+        '<td style="font-weight:700;color:'+gradeColor(pct)+'">'+total+'</td>'+
+        '<td><span class="pct-pill" style="background:'+gradeColor(pct)+'22;color:'+gradeColor(pct)+';border:1px solid '+gradeColor(pct)+'44">'+Math.round(pct*100)+'%</span></td>'+
+        '<td style="font-weight:700;color:'+absColor+'">'+abs+'</td>'+
+        '<td style="font-size:.8rem;color:'+(passing?"#10b981":"#ef4444")+';font-weight:700">'+(passing?"Pass":"Below")+'</td>'+
+        '<td style="color:var(--muted);font-size:.78rem">'+stu.pw+'</td>'+
+        '<td><button class="ebtn" onclick="APP.openEditStudent(\''+stu.id+'\')">Info</button></td>'+
+        '</tr>';
+    }).join("")||'<tr><td colspan="20" class="empty">No students</td></tr>';
+    document.querySelectorAll(".name-link").forEach(function(e){
+      e.addEventListener("click",function(){ APP.openStuDetail(e.dataset.id); });
+    });
+  }
 
-  // Status pills — pass/fail only, no letter grade
-  const statusRow = document.getElementById("stuStatusRow");
-  const passing = pct >= 0.80;
-  let html = `<span class="pass-pill" style="background:${passing?"rgba(16,185,129,.18)":"rgba(239,68,68,.18)"};color:${passing?"#10b981":"#ef4444"};border:1px solid ${passing?"rgba(16,185,129,.4)":"rgba(239,68,68,.4)"}">${passing?"✓ Passing":"✗ Needs Improvement"}</span>`;
-  if(rankPos===0) html+=`<span class="top3-badge" style="background:rgba(245,158,11,.2);color:#f59e0b;border:1px solid rgba(245,158,11,.4)">🥇 Top of Class</span>`;
-  else if(rankPos===1) html+=`<span class="top3-badge" style="background:rgba(148,163,184,.15);color:#94a3b8;border:1px solid rgba(148,163,184,.3)">🥈 #2 in Class</span>`;
-  else if(rankPos===2) html+=`<span class="top3-badge" style="background:rgba(205,127,50,.15);color:#cd7f32;border:1px solid rgba(205,127,50,.3)">🥉 #3 in Class</span>`;
-  statusRow.innerHTML=html;
+  // ===================== ATTENDANCE =====================
+  function renderAttendance(){
+    var sessions=getSessions();
+    // Session chips with edit buttons
+    var sh=el("attSessionHeader");
+    if(sh){
+      if(sessions.length){
+        sh.innerHTML='<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;align-items:center">'+
+          '<span style="font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px">Sessions:</span>'+
+          sessions.map(function(s){
+            return'<span style="display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 10px;">'+
+              '<span style="font-weight:600;font-size:.82rem">'+s.name+'</span>'+
+              '<span style="color:var(--muted);font-size:.72rem">'+(s.date||"")+'</span>'+
+              '<button class="ebtn" style="padding:2px 8px;font-size:.75rem;margin:0" onclick="APP.openEditSession(\''+s.id+'\')">✏️ Edit</button>'+
+              '</span>';
+          }).join("")+
+          '</div>';
+      } else {
+        sh.innerHTML='<p style="color:var(--muted);font-size:.85rem;margin-bottom:1rem">No sessions yet. Click "+ Add Class Session" to get started.</p>';
+      }
+    }
+    el("attGrid").innerHTML=getStudents().map(function(stu){
+      var abs=absences(stu,sessions);
+      var absColor=abs>=2?"#ef4444":abs===1?"#f59e0b":"#10b981";
+      return'<div class="att-card">'+
+        '<div class="ac-name">'+
+          '<span>'+stu.name+(stu.removed?'<span class="removed-tag" style="margin-left:.4rem">OUT</span>':'')+'</span>'+
+          '<span class="att-count" style="color:'+absColor+'">Abs: '+abs+'</span>'+
+        '</div>'+
+        '<div class="att-sessions">'+
+          (sessions.length?sessions.map(function(s){
+            var st=(stu.att&&stu.att[s.id])||"P";
+            return'<div class="att-session">'+
+              '<label>'+s.name+'<br><span style="font-size:.6rem;color:var(--muted)">'+(s.date||"")+'</span></label>'+
+              '<div class="att-seg">'+
+                ['P','A','E'].map(function(opt){
+                  return'<button class="att-btn'+(st===opt?" "+opt:"")+'" onclick="APP.toggleAtt(\''+stu.id+'\',\''+s.id+'\',\''+opt+'\')">'+opt+'</button>';
+                }).join("")+
+              '</div>'+
+            '</div>';
+          }).join(""):'<span style="color:var(--muted);font-size:.8rem">No sessions added yet</span>')+
+        '</div>'+
+      '</div>';
+    }).join("")||'<div class="empty">No students</div>';
+  }
 
-  // Attendance warning
-  const abs=absences(stu,sessions);
-  const wb=document.getElementById("attWarnBanner");
-  if(abs>=2){wb.style.display="flex";wb.className="att-warn att-danger";wb.innerHTML=`⚠️ <strong>You have ${abs} unexcused absence${abs>1?"s":""}.</strong>&nbsp; 2 or more absences may result in removal from the program.`;}
-  else if(abs===1){wb.style.display="flex";wb.className="att-warn";wb.innerHTML=`📌 You have <strong>1 unexcused absence</strong>. A second absence may result in removal.`;}
-  else wb.style.display="none";
+  // ===================== ASSIGNMENTS =====================
+  function renderAssignments(){
+    el("assignList").innerHTML=getAssigns().length?
+      getAssigns().map(function(a){
+        return'<div class="assign-row">'+
+          '<div class="ar-name"><span class="name-link" style="cursor:pointer" onclick="APP.openMassGrade(\''+a.id+'\')">'+a.name+'</span> <span class="ar-badge">'+a.cat+'</span></div>'+
+          '<div class="ar-max">Max: '+a.max+' pts</div>'+
+          (a.link?'<a class="ar-link" href="'+a.link+'" target="_blank">🔗 '+(a.linkLabel||a.link)+'</a>':'<span style="color:var(--muted);font-size:.8rem">No link</span>')+
+          '<button class="ebtn" onclick="APP.openEditAssign(\''+a.id+'\')">Edit</button>'+
+        '</div>';
+      }).join(""):
+      '<div class="empty">No assignments. Click "+ Add Assignment".</div>';
+  }
 
-  // Score cards
-  document.getElementById("stuCards").innerHTML=assigns.map(a=>{const v=stu.grades?.[a.id]??0;const c=barColor(a.max?v/a.max:0);return`<div class="sc"><div class="sc-lbl">${a.name}</div><div class="sc-val" style="color:${c}">${v}<span class="sc-max">/${a.max}</span></div></div>`;}).join("");
+  // ===================== AVERAGES =====================
+  function renderAverages(){
+    var assigns=getAssigns();
+    var active=getStudents().filter(function(s){ return !s.removed&&getTotal(s,assigns)>0; });
+    function avg(fn){ return active.length?(active.reduce(function(s,st){ return s+fn(st); },0)/active.length).toFixed(1):"—"; }
+    el("avgGrid").innerHTML=[].concat(
+      assigns.map(function(a){ return {label:a.name,val:avg(function(s){ return (s.grades&&s.grades[a.id])||0; }),max:a.max}; }),
+      [{label:"Total Avg",val:avg(function(s){ return getTotal(s,assigns); }),max:getMax(assigns)}]
+    ).map(function(item){
+      var p=item.max&&item.val!=="—"?item.val/item.max:0;
+      var c=item.val==="—"?"var(--muted)":barColor(p);
+      return'<div class="avg-card"><div class="avg-val" style="color:'+c+'">'+item.val+'</div><div class="avg-lbl">'+item.label+'<br><span style="opacity:.5">/ '+item.max+'</span></div></div>';
+    }).join("");
+    // Cross-class comparison
+    var rows=Object.values(classes).map(function(cl){
+      var sts=objToArr(cl.students).filter(function(s){ return !s.removed; });
+      var asgns=objToArr(cl.assignments);
+      var mx=getMax(asgns);
+      var avgScore=sts.length?sts.reduce(function(s,st){ return s+getTotal(st,asgns); },0)/sts.length:0;
+      var avgPct=mx?avgScore/mx:0;
+      var passRate=sts.length?sts.filter(function(s){ return getPct(s,asgns)>=0.80; }).length/sts.length:0;
+      return {id:cl.id,name:cl.name,count:sts.length,avgScore:avgScore,avgPct:avgPct,passRate:passRate};
+    }).sort(function(a,b){ return b.avgPct-a.avgPct; });
+    el("compareBody").innerHTML=rows.map(function(r,i){
+      var medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":"";
+      var isCur=r.id===activeClassId;
+      return'<tr class="'+(isCur?"cur-class":"")+'">'+
+        '<td>'+(isCur?"→ ":"")+'<strong>'+r.name+'</strong></td>'+
+        '<td>'+r.count+'</td>'+
+        '<td style="color:'+barColor(r.avgPct)+';font-weight:700">'+r.avgScore.toFixed(1)+'</td>'+
+        '<td><span class="pct-pill" style="background:'+barColor(r.avgPct)+'22;color:'+barColor(r.avgPct)+';border:1px solid '+barColor(r.avgPct)+'44">'+Math.round(r.avgPct*100)+'%</span></td>'+
+        '<td>'+Math.round(r.passRate*100)+'%</td>'+
+        '<td>'+medal+' #'+(i+1)+'</td>'+
+      '</tr>';
+    }).join("")||'<tr><td colspan="6" class="empty">No data</td></tr>';
+  }
 
-  // Assignment rows
-  document.getElementById("stuRows").innerHTML=assigns.map(a=>{const v=stu.grades?.[a.id]??0;const p=a.max?v/a.max:0;const c=barColor(p);const lnk=a.link?`<a href="${a.link}" target="_blank" style="color:var(--accent);font-size:.78rem;margin-left:.5rem">🔗 ${a.linkLabel||"View"}</a>`:"";return`<tr><td><span style="font-weight:600">${a.name}</span><span class="ar-badge" style="margin-left:.5rem">${a.cat}</span>${lnk}</td><td style="color:${c};font-weight:700">${v}</td><td style="color:var(--muted)">${a.max}</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${Math.round(p*100)}%;background:${c}"></div></div><span class="bar-sc" style="color:${c}">${Math.round(p*100)}%</span></div></td></tr>`;}).join("")||`<tr><td colspan="4" class="empty">No assignments yet</td></tr>`;
+  // ===================== CLASSES =====================
+  function renderClasses(){
+    el("classesList").innerHTML=Object.values(classes).map(function(c){
+      var sts=objToArr(c.students).filter(function(s){ return !s.removed; });
+      return'<div class="class-row '+(c.id===activeClassId?"class-active":"")+'">'+
+        '<div>'+
+          '<div class="cr-name">'+c.name+(c.id===activeClassId?' <span class="info-chip" style="color:var(--accent)">Active</span>':'')+'</div>'+
+          '<div class="cr-info">'+sts.length+' students · '+objToArr(c.assignments).length+' assignments · '+(c.start||"?")+' → '+(c.end||"?")+'</div>'+
+        '</div>'+
+        '<button class="ebtn" onclick="APP.setActiveClass(\''+c.id+'\')">Set Active</button>'+
+      '</div>';
+    }).join("");
+  }
 
-  // Attendance rows
-  document.getElementById("stuAttRows").innerHTML=sessions.length?sessions.map(s=>{const st=(stu.att||{})[s.id]||"P";const c=attColor(st);return`<tr><td style="font-weight:600">${s.name}</td><td style="color:var(--muted)">${s.date||"—"}</td><td><span class="g-pill" style="background:${c}22;color:${c};border:1px solid ${c}44">${attLabel(st)}</span></td></tr>`;}).join(""):`<tr><td colspan="3" class="empty">No sessions recorded</td></tr>`;
-}
+  // ===================== SESSION MODAL =====================
+  function openAddSession(){
+    _editSesId=null;
+    el("sesTitle").textContent="Add Class Session";
+    el("sesName").value="Class "+(getSessions().length+1);
+    el("sesDate").value=new Date().toISOString().split("T")[0];
+    el("sesDeleteBtn").style.display="none";
+    openModal("sessionModal");
+  }
 
-// ===================== ADMIN VIEW =====================
-function showAdmin() {
-  switchScreen("adminScreen");
-  buildAdmClassSel();
-  renderAll();
-}
+  function openEditSession(sesId){
+    _editSesId=sesId;
+    var s=getSessions().find(function(x){ return x.id===sesId; });
+    if(!s){ showToast("Session not found","bad"); return; }
+    el("sesTitle").textContent="Edit Class Session";
+    el("sesName").value=s.name;
+    el("sesDate").value=s.date||"";
+    el("sesDeleteBtn").style.display="block";
+    openModal("sessionModal");
+  }
 
-function buildAdmClassSel() {
-  const sel=document.getElementById("admClassSel");
-  sel.innerHTML=Object.values(classes).map(c=>`<option value="${c.id}"${c.id===activeClassId?" selected":""}>${c.name}</option>`).join("");
-}
+  function saveSession(){
+    var name=el("sesName").value.trim();
+    var date=el("sesDate").value;
+    if(!name){ showToast("Session name required","bad"); return; }
+    var cl=cls();
+    if(!cl.sessions) cl.sessions={};
+    if(_editSesId){
+      if(!cl.sessions[_editSesId]) cl.sessions[_editSesId]={id:_editSesId};
+      cl.sessions[_editSesId].name=name;
+      cl.sessions[_editSesId].date=date;
+    } else {
+      var newId=uid();
+      cl.sessions[newId]={id:newId,name:name,date:date};
+      objToArr(cl.students).forEach(function(s){
+        if(!s.att) s.att={};
+        s.att[newId]="P";
+        cl.students[s.id]=s;
+      });
+    }
+    scheduleSave();
+    closeAll();
+    renderAll();
+    showToast(_editSesId?"Session updated":"Session added — all students set to Present","ok");
+  }
 
-function renderAll() {
-  const cl=cls();
-  if(!cl) return;
-  const active=getStudents().filter(s=>!s.removed);
-  document.getElementById("admSummary").textContent=`${cl.name} · ${active.length} active students · ${getAssigns().length} assignments · ${getSessions().length} sessions`;
-  renderRoster();
-  renderAttendance();
-  renderAssignments();
-  renderAverages();
-  renderClasses();
-  document.getElementById("rosterInfo").textContent=`${active.length} active · ${getStudents().filter(s=>s.removed).length} removed`;
-}
+  function deleteSession(){
+    if(!confirm("Delete this session? All attendance records for it will be removed.")) return;
+    var cl=cls();
+    delete cl.sessions[_editSesId];
+    objToArr(cl.students).forEach(function(s){
+      if(s.att) delete s.att[_editSesId];
+    });
+    scheduleSave(); closeAll(); renderAll(); showToast("Session deleted","ok");
+  }
 
-// ===================== ROSTER =====================
-function renderRoster() {
-  const cl=cls(); const assigns=getAssigns(); const sessions=getSessions();
-  let students=[...getStudents()];
-  const top3=getTop3(students,assigns);
-  if(_sortByGrade) students.sort((a,b)=>getPct(b,assigns)-getPct(a,assigns));
+  function toggleAtt(stuId,sesId,val){
+    var cl=cls();
+    var stu=cl.students[stuId];
+    if(!stu) return;
+    if(!stu.att) stu.att={};
+    stu.att[sesId]=val;
+    cl.students[stuId]=stu;
+    scheduleSave();
+    renderAttendance();
+    renderRoster();
+    var abs=absences(stu,getSessions());
+    if(abs>=2&&!stu.removed) showToast("⚠ "+stu.name+" has "+abs+" absences — review for removal","warn");
+    else showToast("Attendance updated","ok");
+  }
 
-  document.getElementById("rosterHead").innerHTML=`<tr>
-    <th>Name <button class="sort-btn ${_sortByGrade?"active":""}" id="sortGradeBtn" title="Sort by grade">⇅</button></th>
-    <th>Branch</th>
-    ${assigns.map(a=>`<th>${a.name}<br><span style="font-weight:400;color:var(--muted2)">/${a.max}</span></th>`).join("")}
-    <th>Total</th><th>%</th><th>Abs</th><th>Pass</th><th>PW</th><th></th>
-  </tr>`;
+  // ===================== GRADE MODALS =====================
+  function openEditGrades(stuId){
+    _editStuId=stuId;
+    var stu=cls().students[stuId];
+    el("egTitle").textContent="✏️ Edit Grades — "+stu.name;
+    el("egFields").innerHTML=getAssigns().map(function(a){
+      return'<div class="fg"><label>'+a.name+' (max '+a.max+')</label>'+
+        '<input type="number" id="eg_'+a.id+'" min="0" max="'+a.max+'" value="'+((stu.grades&&stu.grades[a.id]!==undefined)?stu.grades[a.id]:0)+'" /></div>';
+    }).join("")||'<div style="color:var(--muted)">No assignments yet.</div>';
+    openModal("editGradeModal");
+  }
 
-  document.getElementById("rosterBody").innerHTML=students.map((stu,idx)=>{
-    const total=getTotal(stu,assigns),mx=getMax(assigns),pct=mx?total/mx:0;
-    const rankPos=top3.indexOf(stu.id);
-    const abs=absences(stu,sessions);
-    const absColor=abs>=2?"#ef4444":abs===1?"#f59e0b":"#10b981";
-    const passing=pct>=0.80;
-    const rankClass=rankPos===0?"rank-1":rankPos===1?"rank-2":rankPos===2?"rank-3":"";
-    const rankHtml=rankPos>=0&&rankPos<=2?`<span class="rank-badge">${["🥇","🥈","🥉"][rankPos]}</span>`:"";
-    return`<tr class="${stu.removed?"removed-row":""} ${rankClass}">
-      <td><span class="name-link" data-id="${stu.id}">${rankHtml}${stu.name}${stu.removed?'<span class="removed-tag" style="margin-left:.4rem">OUT</span>':""}</span></td>
-      <td style="color:var(--muted)">${stu.branch||"—"}</td>
-      ${assigns.map(a=>`<td style="text-align:center">${stu.grades?.[a.id]??0}</td>`).join("")}
-      <td style="font-weight:700;color:${gradeColor(pct)}">${total}</td>
-      <td><span class="pct-pill" style="background:${gradeColor(pct)}22;color:${gradeColor(pct)};border:1px solid ${gradeColor(pct)}44">${Math.round(pct*100)}%</span></td>
-      <td style="font-weight:700;color:${absColor}">${abs}</td>
-      <td><span style="font-size:.8rem;color:${passing?"#10b981":"#ef4444"};font-weight:700">${passing?"Pass":"Below"}</span></td>
-      <td style="color:var(--muted);font-size:.78rem">${stu.pw}</td>
-      <td style="white-space:nowrap"><button class="ebtn" onclick="openEditStudent('${stu.id}')">Info</button></td>
-    </tr>`;
-  }).join("")||`<tr><td colspan="20" class="empty">No students yet</td></tr>`;
+  function saveGrades(){
+    var stu=cls().students[_editStuId];
+    if(!stu.grades) stu.grades={};
+    getAssigns().forEach(function(a){
+      var inp=el("eg_"+a.id);
+      if(inp) stu.grades[a.id]=Math.min(a.max,Math.max(0,parseInt(inp.value)||0));
+    });
+    cls().students[_editStuId]=stu;
+    scheduleSave(); closeAll(); renderAll(); showToast("Grades saved","ok");
+  }
 
-  // Name click → detail modal
-  document.querySelectorAll(".name-link").forEach(el=>{
-    el.addEventListener("click",()=>openStuDetail(el.dataset.id));
-  });
-  document.getElementById("sortGradeBtn")?.addEventListener("click",toggleSort);
-}
+  function openMassGrade(assignId){
+    var a=getAssigns().find(function(x){ return x.id===assignId; }); if(!a) return;
+    el("mgTitle").textContent="📊 "+a.name+" — Enter Grades";
+    var students=getStudents().filter(function(s){ return !s.removed; });
+    el("massHead").innerHTML='<tr><th>Student</th><th>'+a.name+' (max '+a.max+')</th></tr>';
+    el("massBody").innerHTML=students.map(function(s){
+      return'<tr><td>'+s.name+'</td><td>'+
+        '<input class="grade-inp" type="number" min="0" max="'+a.max+'" value="'+((s.grades&&s.grades[assignId]!==undefined)?s.grades[assignId]:0)+'" data-sid="'+s.id+'" data-aid="'+assignId+'" />'+
+        '</td></tr>';
+    }).join("");
+    el("massSaveBtn").onclick=function(){ saveMassGrades(assignId); };
+    openModal("massGradeModal");
+  }
 
-function toggleSort() {
-  _sortByGrade=!_sortByGrade;
-  renderRoster();
-}
+  function saveMassGrades(assignId){
+    document.querySelectorAll("#massBody .grade-inp").forEach(function(inp){
+      var sid=inp.dataset.sid;
+      var val=Math.min(parseInt(inp.max),Math.max(0,parseInt(inp.value)||0));
+      var stu=cls().students[sid];
+      if(!stu.grades) stu.grades={};
+      stu.grades[assignId]=val;
+      cls().students[sid]=stu;
+    });
+    scheduleSave(); closeAll(); renderAll(); showToast("All grades saved","ok");
+  }
 
-// ===================== STUDENT DETAIL MODAL =====================
-function openStuDetail(stuId) {
-  _editStuId=stuId;
-  const cl=cls(); const assigns=getAssigns(); const sessions=getSessions();
-  const stu=cl.students[stuId]; if(!stu) return;
-  const total=getTotal(stu,assigns),mx=getMax(assigns),pct=mx?total/mx:0;
-  const abs=absences(stu,sessions);
-  const top3=getTop3(getStudents(),assigns);
-  const rankPos=top3.indexOf(stu.id);
+  // ===================== STUDENT DETAIL =====================
+  function openStuDetail(stuId){
+    _editStuId=stuId;
+    var assigns=getAssigns(); var sessions=getSessions();
+    var stu=cls().students[stuId]; if(!stu) return;
+    var total=getTotal(stu,assigns),mx=getMax(assigns),pct=mx?total/mx:0;
+    var abs=absences(stu,sessions);
+    var top3=getTop3(getStudents(),assigns);
+    var rankPos=top3.indexOf(stu.id);
+    var passing=pct>=0.80;
+    el("sdTitle").textContent="👤 "+stu.name;
+    el("sdScoreCards").innerHTML=
+      '<div class="stu-detail-card"><div class="sdc-lbl">Total Score</div><div class="sdc-val" style="color:'+gradeColor(pct)+'">'+total+' <span style="font-size:.9rem;color:var(--muted)">/ '+mx+'</span></div></div>'+
+      '<div class="stu-detail-card"><div class="sdc-lbl">Percentage</div><div class="sdc-val" style="color:'+gradeColor(pct)+'">'+Math.round(pct*100)+'%</div></div>'+
+      '<div class="stu-detail-card"><div class="sdc-lbl">Status</div><div class="sdc-val" style="color:'+(passing?"#10b981":"#ef4444");
+    el("sdScoreCards").innerHTML+=';font-size:1.1rem">'+(passing?"✓ Passing":"✗ Below 80%")+'</div></div>'+
+      '<div class="stu-detail-card"><div class="sdc-lbl">Absences</div><div class="sdc-val" style="color:'+(abs>=2?"#ef4444":abs===1?"#f59e0b":"#10b981")+'">'+abs+(abs>=2?" ⚠️":"")+'</div></div>'+
+      (rankPos>=0&&rankPos<=2?'<div class="stu-detail-card" style="grid-column:1/-1"><div class="sdc-lbl">Class Rank</div><div class="sdc-val">'+["🥇 #1 — Top of Class","🥈 #2 in Class","🥉 #3 in Class"][rankPos]+'</div></div>':"");
+    el("sdAssignTable").innerHTML='<div class="sec-title" style="margin-bottom:.5rem">Grades</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Assignment</th><th>Score</th><th>Max</th><th>%</th></tr></thead><tbody>'+
+      assigns.map(function(a){ var v=(stu.grades&&stu.grades[a.id])||0; var p=a.max?v/a.max:0; var c=barColor(p); return'<tr><td>'+a.name+'</td><td style="color:'+c+';font-weight:700">'+v+'</td><td style="color:var(--muted)">'+a.max+'</td><td style="color:'+c+'">'+Math.round(p*100)+'%</td></tr>'; }).join("")+
+      '</tbody></table></div>';
+    el("sdAttTable").innerHTML=sessions.length?
+      '<div class="sec-title" style="margin-bottom:.5rem;margin-top:1rem">Attendance</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Session</th><th>Date</th><th>Status</th></tr></thead><tbody>'+
+      sessions.map(function(s){ var st=(stu.att&&stu.att[s.id])||"P"; var c=attColor(st); return'<tr><td>'+s.name+'</td><td style="color:var(--muted)">'+(s.date||"—")+'</td><td><span class="g-pill" style="background:'+c+'22;color:'+c+';border:1px solid '+c+'44">'+attLabel(st)+'</span></td></tr>'; }).join("")+
+      '</tbody></table></div>':"";
+    el("sdEditBtn").onclick=function(){ closeAll(); openEditGrades(stuId); };
+    el("sdRemoveBtn").textContent=stu.removed?"Reinstate":"Remove from Program";
+    el("sdRemoveBtn").onclick=function(){
+      stu.removed=!stu.removed; cls().students[stuId]=stu;
+      scheduleSave(); closeAll(); renderAll();
+      showToast(stu.removed?"Student removed":"Student reinstated","ok");
+    };
+    openModal("stuDetailModal");
+  }
 
-  document.getElementById("sdTitle").textContent=`👤 ${stu.name}`;
+  // ===================== STUDENT MODAL =====================
+  function openAddStudent(){
+    _editStuId=null;
+    el("smTitle").textContent="Add Student";
+    ["smName","smBranch","smPw","smBM","smSup"].forEach(function(id){ el(id).value=""; });
+    el("smRemoveBtn").style.display="none";
+    openModal("studentModal");
+  }
 
-  // Score cards
-  const passing=pct>=0.80;
-  document.getElementById("sdScoreCards").innerHTML=`
-    <div class="stu-detail-card"><div class="sdc-lbl">Total Score</div><div class="sdc-val" style="color:${gradeColor(pct)}">${total} <span style="font-size:.9rem;color:var(--muted)">/ ${mx}</span></div></div>
-    <div class="stu-detail-card"><div class="sdc-lbl">Percentage</div><div class="sdc-val" style="color:${gradeColor(pct)}">${Math.round(pct*100)}%</div></div>
-    <div class="stu-detail-card"><div class="sdc-lbl">Status</div><div class="sdc-val" style="color:${passing?"#10b981":"#ef4444"};font-size:1.1rem">${passing?"✓ Passing":"✗ Below 80%"}</div></div>
-    <div class="stu-detail-card"><div class="sdc-lbl">Absences</div><div class="sdc-val" style="color:${abs>=2?"#ef4444":abs===1?"#f59e0b":"#10b981"}">${abs} ${abs>=2?"⚠️":""}</div></div>
-    ${rankPos>=0&&rankPos<=2?`<div class="stu-detail-card" style="grid-column:1/-1"><div class="sdc-lbl">Class Rank</div><div class="sdc-val">${["🥇 #1 — Top of Class","🥈 #2 in Class","🥉 #3 in Class"][rankPos]}</div></div>`:""}
-  `;
+  function openEditStudent(stuId){
+    _editStuId=stuId;
+    var stu=cls().students[stuId];
+    el("smTitle").textContent="Edit Student Info";
+    el("smName").value=stu.name; el("smBranch").value=stu.branch||"";
+    el("smPw").value=stu.pw; el("smBM").value=stu.bm||""; el("smSup").value=stu.sup||"";
+    var rb=el("smRemoveBtn");
+    rb.style.display="block"; rb.textContent=stu.removed?"Reinstate":"Remove from Program";
+    rb.onclick=function(){ stu.removed=!stu.removed; cls().students[stuId]=stu; scheduleSave(); closeAll(); renderAll(); showToast(stu.removed?"Removed":"Reinstated","ok"); };
+    openModal("studentModal");
+  }
 
-  // Assignment table
-  document.getElementById("sdAssignTable").innerHTML=`<div class="sec-title" style="margin-bottom:.5rem">Grades</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Assignment</th><th>Score</th><th>Max</th><th>%</th></tr></thead><tbody>
-    ${assigns.map(a=>{const v=stu.grades?.[a.id]??0;const p=a.max?v/a.max:0;const c=barColor(p);return`<tr><td>${a.name}</td><td style="color:${c};font-weight:700">${v}</td><td style="color:var(--muted)">${a.max}</td><td style="color:${c}">${Math.round(p*100)}%</td></tr>`;}).join("")}
-  </tbody></table></div>`;
+  function saveStudent(){
+    var cl=cls();
+    var name=el("smName").value.trim(); var pw=el("smPw").value.trim();
+    if(!name){ showToast("Name required","bad"); return; }
+    if(!pw){ showToast("Password required","bad"); return; }
+    if(_editStuId){
+      var stu=cl.students[_editStuId];
+      stu.name=name; stu.branch=el("smBranch").value.trim();
+      stu.pw=pw; stu.bm=el("smBM").value.trim(); stu.sup=el("smSup").value.trim();
+      cl.students[_editStuId]=stu;
+    } else {
+      var newId=uid(); var grades={}; var att={};
+      getAssigns().forEach(function(a){ grades[a.id]=0; });
+      getSessions().forEach(function(s){ att[s.id]="P"; });
+      cl.students[newId]={id:newId,name:name,branch:el("smBranch").value.trim(),bm:el("smBM").value.trim(),sup:el("smSup").value.trim(),pw:pw,removed:false,grades:grades,att:att};
+    }
+    scheduleSave(); closeAll(); renderAll(); buildLoginUI(); showToast("Student saved","ok");
+  }
 
-  // Attendance table
-  document.getElementById("sdAttTable").innerHTML=sessions.length?`<div class="sec-title" style="margin-bottom:.5rem;margin-top:1rem">Attendance</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Session</th><th>Date</th><th>Status</th></tr></thead><tbody>
-    ${sessions.map(s=>{const st=(stu.att||{})[s.id]||"P";const c=attColor(st);return`<tr><td>${s.name}</td><td style="color:var(--muted)">${s.date||"—"}</td><td><span class="g-pill" style="background:${c}22;color:${c};border:1px solid ${c}44">${attLabel(st)}</span></td></tr>`;}).join("")}
-  </tbody></table></div>`:"";
+  // ===================== ASSIGNMENT MODAL =====================
+  function openAddAssign(){
+    _editAssignId=null;
+    el("amTitle").textContent="Add Assignment";
+    ["amName","amLink","amLinkLabel"].forEach(function(id){ el(id).value=""; });
+    el("amMax").value="50"; el("amCat").value="Core";
+    el("amDeleteBtn").style.display="none";
+    openModal("assignModal");
+  }
 
-  document.getElementById("sdEditBtn").onclick=()=>{closeAll();openEditGrades(stuId);};
-  document.getElementById("sdRemoveBtn").textContent=stu.removed?"Reinstate":"Remove from Program";
-  document.getElementById("sdRemoveBtn").onclick=()=>{
-    stu.removed=!stu.removed; scheduleSave(); closeAll(); renderAll();
-    showToast(stu.removed?"Student removed":"Student reinstated","ok");
+  function openEditAssign(aid){
+    _editAssignId=aid;
+    var a=getAssigns().find(function(x){ return x.id===aid; });
+    el("amTitle").textContent="Edit Assignment";
+    el("amName").value=a.name; el("amMax").value=a.max;
+    el("amCat").value=a.cat; el("amLink").value=a.link||""; el("amLinkLabel").value=a.linkLabel||"";
+    el("amDeleteBtn").style.display="block";
+    openModal("assignModal");
+  }
+
+  function saveAssign(){
+    var cl=cls(); var name=el("amName").value.trim(); var max=parseInt(el("amMax").value)||50;
+    if(!name){ showToast("Name required","bad"); return; }
+    if(_editAssignId){
+      var a=cl.assignments[_editAssignId];
+      a.name=name; a.max=max; a.cat=el("amCat").value;
+      a.link=el("amLink").value.trim(); a.linkLabel=el("amLinkLabel").value.trim();
+      cl.assignments[_editAssignId]=a;
+    } else {
+      var newId=uid();
+      cl.assignments[newId]={id:newId,name:name,max:max,cat:el("amCat").value,link:el("amLink").value.trim(),linkLabel:el("amLinkLabel").value.trim()};
+      objToArr(cl.students).forEach(function(s){ if(!s.grades) s.grades={}; if(s.grades[newId]===undefined){ s.grades[newId]=0; cl.students[s.id]=s; } });
+    }
+    scheduleSave(); closeAll(); renderAll(); showToast("Assignment saved","ok");
+  }
+
+  function deleteAssign(){
+    if(!confirm("Delete this assignment? All scores will be removed.")) return;
+    var cl=cls();
+    delete cl.assignments[_editAssignId];
+    objToArr(cl.students).forEach(function(s){ if(s.grades){ delete s.grades[_editAssignId]; cl.students[s.id]=s; } });
+    scheduleSave(); closeAll(); renderAll(); showToast("Assignment deleted","ok");
+  }
+
+  // ===================== CLASS MODAL =====================
+  function openAddClass(){
+    ["clsName","clsStart","clsEnd"].forEach(function(id){ el(id).value=""; });
+    el("clsStart").value=new Date().toISOString().split("T")[0];
+    openModal("classModal");
+  }
+
+  function saveClass(){
+    var name=el("clsName").value.trim();
+    if(!name){ showToast("Class name required","bad"); return; }
+    var newId=uid();
+    classes[newId]={id:newId,name:name,start:el("clsStart").value,end:el("clsEnd").value,
+      assignments:arrToObj(JSON.parse(JSON.stringify(DEF_ASSIGNS))),sessions:{},students:{}};
+    activeClassId=newId;
+    scheduleSave(); closeAll(); buildAdmClassSel(); buildLoginUI(); renderAll(); showToast("New class created!","ok");
+  }
+
+  // ===================== PASSWORD =====================
+  function savePassword(){
+    var p1=el("newPw1").value.trim(); var p2=el("newPw2").value.trim();
+    var errEl=el("pwErr");
+    if(!p1){ errEl.textContent="Please enter a new password."; errEl.style.display="block"; return; }
+    if(p1!==p2){ errEl.textContent="Passwords do not match."; errEl.style.display="block"; return; }
+    if(p1.length<4){ errEl.textContent="Password must be at least 4 characters."; errEl.style.display="block"; return; }
+    adminPw=p1; scheduleSave(); closeAll(); showToast("Password updated","ok");
+  }
+
+  // ===================== LOGOUT =====================
+  function logout(){
+    _curStuId=null; _editStuId=null; _editAssignId=null; _editSesId=null;
+    el("nameSelect").value=""; el("passwordInput").value="";
+    el("errMsg").style.display="none";
+    buildLoginUI(); switchScreen("loginScreen");
+  }
+
+  // ===================== APP NAMESPACE (accessible from onclick) =====================
+  window.APP = {
+    openEditStudent:openEditStudent, openStuDetail:openStuDetail,
+    openEditAssign:openEditAssign, openMassGrade:openMassGrade,
+    openEditSession:openEditSession, toggleAtt:toggleAtt,
+    setActiveClass:function(id){ activeClassId=id; el("admClassSel").value=id; renderAll(); showToast("Active class switched","ok"); },
+    openStuDetailModal:openStuDetail
   };
-  openModal("stuDetailModal");
-}
 
-// ===================== ATTENDANCE =====================
-function renderAttendance() {
-  const sessions=getSessions();
+  // ===================== BUTTON WIRING =====================
+  function wire(id,fn){ var b=el(id); if(b) b.onclick=fn; }
+  wire("signInBtn", handleLogin);
+  wire("stuLogoutBtn", logout);
+  wire("admLogoutBtn", logout);
+  wire("addSessionBtn", openAddSession);
+  wire("sesSaveBtn", saveSession);
+  wire("sesDeleteBtn", deleteSession);
+  wire("addStudentBtn", openAddStudent);
+  wire("smSaveBtn", saveStudent);
+  wire("addAssignBtn", openAddAssign);
+  wire("amSaveBtn", saveAssign);
+  wire("amDeleteBtn", deleteAssign);
+  wire("egSaveBtn", saveGrades);
+  wire("massSaveBtn", null); // set dynamically in openMassGrade
+  wire("addClassBtn", openAddClass);
+  wire("addClassBtn2", openAddClass);
+  wire("clsSaveBtn", saveClass);
+  wire("chgPwBtn", function(){ el("pwErr").style.display="none"; openModal("chgPwModal"); });
+  wire("pwSaveBtn", savePassword);
+  wire("sortGradeBtn", function(){ _sortByGrade=!_sortByGrade; renderRoster(); });
 
-  // Build session headers with edit buttons above the grid
-  const sesHeaderEl = document.getElementById("attSessionHeader");
-  if(sesHeaderEl) {
-    sesHeaderEl.innerHTML = sessions.length
-      ? `<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;align-items:center">
-          <span style="font-size:.78rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px;">Sessions:</span>
-          ${sessions.map(s=>`<span style="display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 10px;font-size:.8rem;">
-            <span style="font-weight:600">${s.name}</span>
-            <span style="color:var(--muted);font-size:.72rem">${s.date||""}</span>
-            <button class="ebtn" style="padding:1px 7px;font-size:.72rem;margin:0 0 0 4px" onclick="window.openEditSession('${s.id}')">✏️</button>
-          </span>`).join("")}
-        </div>`
-      : "";
-  }
+  el("adminLink").onclick=function(){ el("passwordInput").placeholder="Enter admin password"; el("passwordInput").focus(); };
+  el("passwordInput").onkeydown=function(e){ if(e.key==="Enter") handleLogin(); };
+  el("loginClassSel").onchange=populateNames;
+  el("admClassSel").onchange=function(){ activeClassId=el("admClassSel").value; renderAll(); };
 
-  document.getElementById("attGrid").innerHTML=getStudents().map(stu=>{
-    const abs=absences(stu,sessions);
-    const absColor=abs>=2?"#ef4444":abs===1?"#f59e0b":"#10b981";
-    return`<div class="att-card">
-      <div class="ac-name"><span>${stu.name}${stu.removed?`<span class="removed-tag" style="margin-left:.4rem">OUT</span>`:""}</span><span class="att-count" style="color:${absColor}">Abs: ${abs}</span></div>
-      <div class="att-sessions">${sessions.map(s=>{const st=(stu.att||{})[s.id]||"P";return`<div class="att-session"><label title="${s.name} ${s.date||""}">${s.name}<br><span style="font-size:.6rem;color:var(--muted)">${s.date||""}</span></label><div class="att-seg">${["P","A","E"].map(opt=>`<button class="att-btn ${st===opt?opt:""}" onclick="window.toggleAtt('${stu.id}','${s.id}','${opt}')">${opt}</button>`).join("")}</div></div>`;}).join("")||`<span style="color:var(--muted);font-size:.8rem">No sessions added yet</span>`}</div>
-    </div>`;
-  }).join("")||`<div class="empty">No students</div>`;
-
-  // Wire Add Session button every time attendance renders
-  const btn = document.getElementById("addSessionBtn");
-  if(btn) { btn.onclick = null; btn.addEventListener("click", openAddSession); }
-}
-
-window.toggleAtt=function(stuId,sesId,val){
-  if(!cls().students[stuId].att) cls().students[stuId].att={};
-  cls().students[stuId].att[sesId]=val;
-  scheduleSave(); renderAttendance(); renderRoster();
-  const abs=absences(cls().students[stuId],getSessions());
-  if(abs>=2&&!cls().students[stuId].removed) showToast(`⚠ ${cls().students[stuId].name} has ${abs} absences — review for removal`,"warn");
-  else showToast("Attendance updated","ok");
-};
-
-// ===================== ASSIGNMENTS =====================
-function renderAssignments() {
-  document.getElementById("assignList").innerHTML=getAssigns().length?
-    getAssigns().map(a=>`<div class="assign-row">
-      <div class="ar-name"><span class="name-link" style="cursor:pointer" onclick="openMassGrade('${a.id}')">${a.name}</span> <span class="ar-badge">${a.cat}</span></div>
-      <div class="ar-max">Max: ${a.max} pts</div>
-      ${a.link?`<a class="ar-link" href="${a.link}" target="_blank">🔗 ${a.linkLabel||a.link}</a>`:`<span style="color:var(--muted);font-size:.8rem">No link</span>`}
-      <button class="ebtn" onclick="openEditAssign('${a.id}')">Edit</button>
-    </div>`).join(""):
-    `<div class="empty">No assignments. Click "+ Add Assignment".</div>`;
-}
-
-// ===================== MASS GRADE INPUT =====================
-window.openMassGrade=function(assignId){
-  const a=getAssigns().find(x=>x.id===assignId); if(!a) return;
-  document.getElementById("mgTitle").textContent=`📊 ${a.name} — Enter Grades`;
-  const students=getStudents().filter(s=>!s.removed);
-  document.getElementById("massHead").innerHTML=`<tr><th>Student</th><th>${a.name} (max ${a.max})</th></tr>`;
-  document.getElementById("massBody").innerHTML=students.map(s=>`<tr>
-    <td>${s.name}</td>
-    <td><input class="grade-inp" type="number" min="0" max="${a.max}" value="${s.grades?.[assignId]??0}" data-sid="${s.id}" data-aid="${assignId}" /></td>
-  </tr>`).join("");
-  document.getElementById("massSaveBtn").onclick=()=>saveMassGrades(assignId);
-  openModal("massGradeModal");
-};
-
-function saveMassGrades(assignId){
-  const inputs=document.querySelectorAll("#massBody .grade-inp");
-  inputs.forEach(inp=>{
-    const sid=inp.dataset.sid, val=Math.min(parseInt(inp.max),Math.max(0,parseInt(inp.value)||0));
-    if(!cls().students[sid].grades) cls().students[sid].grades={};
-    cls().students[sid].grades[assignId]=val;
+  document.querySelectorAll(".tab").forEach(function(btn){
+    btn.onclick=function(){
+      var t=btn.dataset.tab;
+      document.querySelectorAll(".tab").forEach(function(b){ b.classList.toggle("on",b.dataset.tab===t); });
+      document.querySelectorAll(".pane").forEach(function(p){ p.classList.toggle("on",p.id==="pane-"+t); });
+    };
   });
-  scheduleSave(); closeAll(); renderAll(); showToast("All grades saved","ok");
-}
 
-// ===================== AVERAGES + COMPARISON =====================
-function renderAverages(){
-  const assigns=getAssigns(),active=getStudents().filter(s=>!s.removed&&getTotal(s,assigns)>0);
-  const avg=fn=>active.length?(active.reduce((s,st)=>s+fn(st),0)/active.length).toFixed(1):"—";
-  document.getElementById("avgGrid").innerHTML=[
-    ...assigns.map(a=>({label:a.name,val:avg(s=>s.grades?.[a.id]??0),max:a.max})),
-    {label:"Total Avg",val:avg(s=>getTotal(s,assigns)),max:getMax(assigns)}
-  ].map(item=>{const p=item.max&&item.val!=="—"?item.val/item.max:0;const c=item.val==="—"?"var(--muted)":barColor(p);return`<div class="avg-card"><div class="avg-val" style="color:${c}">${item.val}</div><div class="avg-lbl">${item.label}<br><span style="opacity:.5">/ ${item.max}</span></div></div>`;}).join("");
-
-  // Cross-class comparison
-  const allClasses=Object.values(classes);
-  const rows=allClasses.map(cl=>{
-    const sts=objToArr(cl.students).filter(s=>!s.removed);
-    const asgns=objToArr(cl.assignments);
-    const mx=getMax(asgns);
-    const avgScore=sts.length?sts.reduce((s,st)=>s+getTotal(st,asgns),0)/sts.length:0;
-    const avgPct=mx?avgScore/mx:0;
-    const passRate=sts.length?sts.filter(s=>getPct(s,asgns)>=0.80).length/sts.length:0;
-    return{id:cl.id,name:cl.name,count:sts.length,avgScore,avgPct,passRate};
-  }).sort((a,b)=>b.avgPct-a.avgPct);
-
-  document.getElementById("compareBody").innerHTML=rows.map((r,i)=>{
-    const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":"";
-    const isCur=r.id===activeClassId;
-    return`<tr class="${isCur?"cur-class":""}">
-      <td>${isCur?"→ ":""}<strong>${r.name}</strong></td>
-      <td>${r.count}</td>
-      <td style="color:${barColor(r.avgPct)};font-weight:700">${r.avgScore.toFixed(1)}</td>
-      <td><span class="pct-pill" style="background:${barColor(r.avgPct)}22;color:${barColor(r.avgPct)};border:1px solid ${barColor(r.avgPct)}44">${Math.round(r.avgPct*100)}%</span></td>
-      <td>${Math.round(r.passRate*100)}%</td>
-      <td>${medal} #${i+1}</td>
-    </tr>`;
-  }).join("")||`<tr><td colspan="6" class="empty">No class data</td></tr>`;
-}
-
-// ===================== CLASSES =====================
-function renderClasses(){
-  document.getElementById("classesList").innerHTML=Object.values(classes).map(c=>`<div class="class-row ${c.id===activeClassId?"class-active":""}">
-    <div>
-      <div class="cr-name">${c.name} ${c.id===activeClassId?`<span class="info-chip" style="color:var(--accent)">Active</span>`:""}</div>
-      <div class="cr-info">${objToArr(c.students).filter(s=>!s.removed).length} students · ${objToArr(c.assignments).length} assignments · ${c.start||"?"}${c.end?" → "+c.end:""}</div>
-    </div>
-    <button class="ebtn" onclick="setActiveClass('${c.id}')">Set Active</button>
-  </div>`).join("");
-}
-
-window.setActiveClass=function(id){activeClassId=id;document.getElementById("admClassSel").value=id;renderAll();showToast("Active class switched","ok");};
-
-// ===================== MODAL: EDIT GRADES =====================
-function openEditGrades(stuId){
-  _editStuId=stuId;
-  const stu=cls().students[stuId];
-  document.getElementById("egTitle").textContent=`✏️ Edit Grades — ${stu.name}`;
-  document.getElementById("egFields").innerHTML=getAssigns().map(a=>`<div class="fg"><label>${a.name} (max ${a.max})</label><input type="number" id="eg_${a.id}" min="0" max="${a.max}" value="${stu.grades?.[a.id]??0}" /></div>`).join("")||`<div style="color:var(--muted)">No assignments yet.</div>`;
-  document.getElementById("egSaveBtn").onclick=saveGrades;
-  openModal("editGradeModal");
-}
-window.openEditGrades=openEditGrades;
-
-function saveGrades(){
-  const stu=cls().students[_editStuId];
-  if(!stu.grades) stu.grades={};
-  getAssigns().forEach(a=>{const inp=document.getElementById("eg_"+a.id);if(inp) stu.grades[a.id]=Math.min(a.max,Math.max(0,parseInt(inp.value)||0));});
-  scheduleSave(); closeAll(); renderAll(); showToast("Grades saved","ok");
-}
-
-// ===================== MODAL: STUDENT =====================
-window.openAddStudent=function(){
-  _editStuId=null;
-  document.getElementById("smTitle").textContent="Add Student";
-  ["smName","smBranch","smPw","smBM","smSup"].forEach(id=>document.getElementById(id).value="");
-  document.getElementById("smRemoveBtn").style.display="none";
-  openModal("studentModal");
-};
-window.openEditStudent=function(stuId){
-  _editStuId=stuId; const stu=cls().students[stuId];
-  document.getElementById("smTitle").textContent="Edit Student Info";
-  document.getElementById("smName").value=stu.name;
-  document.getElementById("smBranch").value=stu.branch||"";
-  document.getElementById("smPw").value=stu.pw;
-  document.getElementById("smBM").value=stu.bm||"";
-  document.getElementById("smSup").value=stu.sup||"";
-  const rb=document.getElementById("smRemoveBtn");
-  rb.style.display="block"; rb.textContent=stu.removed?"Reinstate":"Remove from Program";
-  rb.onclick=()=>{stu.removed=!stu.removed;scheduleSave();closeAll();renderAll();showToast(stu.removed?"Removed":"Reinstated","ok");};
-  openModal("studentModal");
-};
-
-function saveStudent(){
-  const cl=cls();
-  const name=document.getElementById("smName").value.trim();
-  const pw=document.getElementById("smPw").value.trim();
-  if(!name){showToast("Name required","bad");return;}
-  if(!pw){showToast("Password required","bad");return;}
-  if(_editStuId){
-    const stu=cl.students[_editStuId];
-    stu.name=name;stu.branch=document.getElementById("smBranch").value.trim();
-    stu.pw=pw;stu.bm=document.getElementById("smBM").value.trim();stu.sup=document.getElementById("smSup").value.trim();
-  } else {
-    const newId=uid(); const grades={},att={};
-    getAssigns().forEach(a=>grades[a.id]=0); getSessions().forEach(s=>att[s.id]="P");
-    cl.students[newId]={id:newId,name,branch:document.getElementById("smBranch").value.trim(),bm:document.getElementById("smBM").value.trim(),sup:document.getElementById("smSup").value.trim(),pw,removed:false,grades,att};
-  }
-  scheduleSave(); closeAll(); renderAll(); buildLoginUI(); showToast("Student saved","ok");
-}
-
-// ===================== MODAL: ASSIGNMENT =====================
-window.openEditAssign=function(aid){
-  _editAssignId=aid; const a=getAssigns().find(x=>x.id===aid);
-  document.getElementById("amTitle").textContent="Edit Assignment";
-  document.getElementById("amName").value=a.name; document.getElementById("amMax").value=a.max;
-  document.getElementById("amCat").value=a.cat; document.getElementById("amLink").value=a.link||"";
-  document.getElementById("amLinkLabel").value=a.linkLabel||"";
-  document.getElementById("amDeleteBtn").style.display="block";
-  openModal("assignModal");
-};
-
-function openAddAssign(){
-  _editAssignId=null;
-  document.getElementById("amTitle").textContent="Add Assignment";
-  ["amName","amLink","amLinkLabel"].forEach(id=>document.getElementById(id).value="");
-  document.getElementById("amMax").value="50"; document.getElementById("amCat").value="Core";
-  document.getElementById("amDeleteBtn").style.display="none";
-  openModal("assignModal");
-}
-
-function saveAssign(){
-  const cl=cls(); const name=document.getElementById("amName").value.trim();
-  const max=parseInt(document.getElementById("amMax").value)||50;
-  if(!name){showToast("Name required","bad");return;}
-  if(_editAssignId){
-    const a=objToArr(cl.assignments).find(x=>x.id===_editAssignId);
-    a.name=name;a.max=max;a.cat=document.getElementById("amCat").value;
-    a.link=document.getElementById("amLink").value.trim();a.linkLabel=document.getElementById("amLinkLabel").value.trim();
-    cl.assignments[_editAssignId]=a;
-  } else {
-    const newId=uid();
-    cl.assignments[newId]={id:newId,name,max,cat:document.getElementById("amCat").value,link:document.getElementById("amLink").value.trim(),linkLabel:document.getElementById("amLinkLabel").value.trim()};
-    objToArr(cl.students).forEach(s=>{if(!s.grades) s.grades={};if(s.grades[newId]===undefined) s.grades[newId]=0;});
-  }
-  scheduleSave(); closeAll(); renderAll(); showToast("Assignment saved","ok");
-}
-
-function deleteAssign(){
-  if(!confirm("Delete this assignment? All scores will be removed.")) return;
-  const cl=cls();
-  delete cl.assignments[_editAssignId];
-  objToArr(cl.students).forEach(s=>{if(s.grades) delete s.grades[_editAssignId];});
-  scheduleSave(); closeAll(); renderAll(); showToast("Assignment deleted","ok");
-}
-
-// ===================== MODAL: SESSION =====================
-function openAddSession(){
-  _editSesId=null;
-  document.getElementById("sesTitle").textContent="Add Class Session";
-  document.getElementById("sesName").value=`Class ${getSessions().length+1}`;
-  document.getElementById("sesDate").value=new Date().toISOString().split("T")[0];
-  document.getElementById("sesDeleteBtn").style.display="none";
-  openModal("sessionModal");
-}
-
-function openEditSession(sesId){
-  _editSesId=sesId; const s=getSessions().find(x=>x.id===sesId);
-  if(!s){ showToast("Session not found","bad"); return; }
-  document.getElementById("sesTitle").textContent="Edit Class Session";
-  document.getElementById("sesName").value=s.name; document.getElementById("sesDate").value=s.date||"";
-  document.getElementById("sesDeleteBtn").style.display="block";
-  window._sesDeleteFn=deleteSession;
-  openModal("sessionModal");
-}
-window.openEditSession=openEditSession;
-window.openAddSession=openAddSession;
-
-function saveSession(){
-  const cl=cls(); const name=document.getElementById("sesName").value.trim();
-  const date=document.getElementById("sesDate").value;
-  if(!name){showToast("Name required","bad");return;}
-  if(_editSesId){
-    cl.sessions[_editSesId].name=name; cl.sessions[_editSesId].date=date;
-  } else {
-    const newId=uid(); cl.sessions[newId]={id:newId,name,date};
-    objToArr(cl.students).forEach(s=>{if(!s.att) s.att={};if(s.att[newId]===undefined) s.att[newId]="P";});
-  }
-  scheduleSave(); closeAll(); renderAll(); showToast("Session saved","ok");
-}
-
-function deleteSession(){
-  if(!confirm("Delete this session? All attendance records for it will be removed.")) return;
-  const cl=cls(); delete cl.sessions[_editSesId];
-  objToArr(cl.students).forEach(s=>{if(s.att) delete s.att[_editSesId];});
-  scheduleSave(); closeAll(); renderAll(); showToast("Session deleted","ok");
-}
-
-// ===================== MODAL: CLASS =====================
-function openAddClass(){
-  ["clsName","clsStart","clsEnd"].forEach(id=>document.getElementById(id).value="");
-  document.getElementById("clsStart").value=new Date().toISOString().split("T")[0];
-  openModal("classModal");
-}
-
-function saveClass(){
-  const name=document.getElementById("clsName").value.trim();
-  const start=document.getElementById("clsStart").value, end=document.getElementById("clsEnd").value;
-  if(!name){showToast("Class name required","bad");return;}
-  const newId=uid();
-  classes[newId]={id:newId,name,start,end,assignments:arrToObj(JSON.parse(JSON.stringify(DEFAULT_ASSIGNMENTS))),sessions:{},students:{}};
-  activeClassId=newId;
-  scheduleSave(); closeAll(); buildAdmClassSel(); buildLoginUI(); renderAll();
-  showToast("New class created!","ok");
-}
-
-// ===================== CHANGE PASSWORD =====================
-function savePassword(){
-  const p1=document.getElementById("newPw1").value.trim();
-  const p2=document.getElementById("newPw2").value.trim();
-  const err=document.getElementById("pwErr");
-  if(!p1){err.textContent="Please enter a new password.";err.style.display="block";return;}
-  if(p1!==p2){err.textContent="Passwords do not match. Please re-enter.";err.style.display="block";return;}
-  if(p1.length<4){err.textContent="Password must be at least 4 characters.";err.style.display="block";return;}
-  adminPw=p1; scheduleSave(); closeAll(); showToast("Admin password updated","ok");
-}
-
-// ===================== TABS =====================
-document.querySelectorAll(".tab").forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    const t=btn.dataset.tab;
-    document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
-    document.querySelectorAll(".pane").forEach(p=>p.classList.toggle("on",p.id==="pane-"+t));
+  document.querySelectorAll(".overlay").forEach(function(o){
+    o.onclick=function(e){ if(e.target===o) closeAll(); };
   });
+
+  // Make closeAll global
+  window.closeAll=closeAll;
+
+  // Inject ebtn styles
+  var st=document.createElement("style");
+  st.textContent=".ebtn{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);color:var(--accent);border-radius:6px;padding:3px 10px;font-size:.78rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;transition:all .15s;margin:0 2px}.ebtn:hover{background:rgba(56,189,248,.22)}";
+  document.head.appendChild(st);
 });
-
-// ===================== UTILS =====================
-function switchScreen(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");}
-function openModal(id){document.getElementById(id).classList.add("open");}
-function closeAll(){document.querySelectorAll(".overlay").forEach(o=>o.classList.remove("open"));}
-window.closeAll=closeAll;
-function logout(){
-  _curStuId=null;_editStuId=null;_editAssignId=null;_editSesId=null;
-  document.getElementById("nameSelect").value="";
-  document.getElementById("passwordInput").value="";
-  document.getElementById("errMsg").style.display="none";
-  buildLoginUI(); switchScreen("loginScreen");
-}
-function showToast(msg,type="ok"){
-  const t=document.getElementById("toast");
-  t.textContent=msg; t.className=`toast ${type} show`;
-  setTimeout(()=>t.classList.remove("show"),3200);
-}
-window.showToast=showToast;
-
-// Expose helpers
-window.openAddStudent=window.openAddStudent;
-const ebtnStyle=`background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);color:var(--accent);border-radius:6px;padding:3px 10px;font-size:.78rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;transition:all .15s;margin:0 2px`;
-document.querySelectorAll(".ebtn").forEach(b=>b.setAttribute("style",ebtnStyle));
-
-// Wire up all buttons
-document.getElementById("signInBtn").addEventListener("click",handleLogin);
-document.getElementById("adminLink").addEventListener("click",()=>{document.getElementById("passwordInput").placeholder="Enter admin password";document.getElementById("passwordInput").focus();});
-document.getElementById("passwordInput").addEventListener("keydown",e=>{if(e.key==="Enter") handleLogin();});
-document.getElementById("stuLogoutBtn").addEventListener("click",logout);
-document.getElementById("admLogoutBtn").addEventListener("click",logout);
-document.getElementById("chgPwBtn").addEventListener("click",()=>openModal("chgPwModal"));
-document.getElementById("pwSaveBtn").addEventListener("click",savePassword);
-document.getElementById("addStudentBtn").addEventListener("click",window.openAddStudent);
-// addSessionBtn wired below in renderAttendance
-document.getElementById("addAssignBtn").addEventListener("click",openAddAssign);
-document.getElementById("addClassBtn").addEventListener("click",openAddClass);
-document.getElementById("addClassBtn2").addEventListener("click",openAddClass);
-document.getElementById("admClassSel").addEventListener("change",()=>{activeClassId=document.getElementById("admClassSel").value;renderAll();});
-document.getElementById("egSaveBtn").addEventListener("click",saveGrades);
-document.getElementById("smSaveBtn").addEventListener("click",saveStudent);
-document.getElementById("amSaveBtn").addEventListener("click",saveAssign);
-document.getElementById("amDeleteBtn").addEventListener("click",deleteAssign);
-document.getElementById("sesSaveBtn").addEventListener("click",saveSession);
-document.getElementById("sesDeleteBtn").addEventListener("click",function(){ if(window._sesDeleteFn) window._sesDeleteFn(); });
-document.getElementById("clsSaveBtn").addEventListener("click",saveClass);
-document.querySelectorAll(".overlay").forEach(o=>o.addEventListener("click",e=>{if(e.target===o) closeAll();}));
-
-// Apply ebtn styles dynamically for rendered buttons
-const styleTag=document.createElement("style");
-styleTag.textContent=`.ebtn{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);color:var(--accent);border-radius:6px;padding:3px 10px;font-size:.78rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;transition:all .15s;margin:0 2px}.ebtn:hover{background:rgba(56,189,248,.22)}`;
-document.head.appendChild(styleTag);
-
-// ===================== BOOT =====================
-initFirebase();
 </script>
 </body>
 </html>
-
