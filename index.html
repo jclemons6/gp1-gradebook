@@ -224,6 +224,17 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
   .tabs{gap:.2rem}.tab{font-size:.75rem;padding:.45rem .5rem}
   .stu-detail-grid{grid-template-columns:1fr}
 }
+
+/* Assignment active toggle */
+.assign-toggle{display:flex;align-items:center;gap:.5rem;flex-shrink:0}
+.toggle-track{position:relative;width:36px;height:20px;border-radius:10px;background:var(--surface3);border:1px solid var(--border);cursor:pointer;transition:background .2s,border-color .2s;flex-shrink:0}
+.toggle-track.active{background:rgba(16,185,129,.35);border-color:rgba(16,185,129,.6)}
+.toggle-knob{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--muted);transition:transform .2s,background .2s}
+.toggle-track.active .toggle-knob{transform:translateX(16px);background:#10b981}
+.toggle-lbl{font-size:.75rem;font-weight:600;color:var(--muted);min-width:52px}
+.toggle-track.active + .toggle-lbl{color:#10b981}
+.assign-row.inactive{opacity:.55}
+.assign-row.inactive .ar-name{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -293,7 +304,7 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
     <div class="topbar-brand">GP1 Gradebook Portal</div>
     <div class="topbar-right">
       <span id="fbStatusAdm" class="fb-status fb-loading">⟳ Connecting</span>
-      <span class="info-chip" style="color:var(--gold);border-color:rgba(245,158,11,.3)">ADMIN</span>
+      <span class="info-chip" style="color:var(--gold);border-color:rgba(245,158,11,.3)">⚙ ADMIN</span>
       <button class="btn-admin" id="chgPwBtn">🔒 Change Password</button>
       <button class="btn-logout" id="admLogoutBtn">Sign Out</button>
     </div>
@@ -526,11 +537,11 @@ window.addEventListener("fbReady", function() {
 
   // ===================== DEFAULTS =====================
   const DEF_ASSIGNS = [
-    {id:"a1",name:"BSA",max:50,cat:"Core",link:"",linkLabel:""},
-    {id:"a2",name:"P&L",max:50,cat:"Core",link:"",linkLabel:""},
-    {id:"a3",name:"Reporting",max:50,cat:"Core",link:"",linkLabel:""},
-    {id:"a4",name:"Daily Tools",max:50,cat:"Core",link:"",linkLabel:""},
-    {id:"a5",name:"Disposition",max:50,cat:"Core",link:"",linkLabel:""},
+    {id:"a1",name:"BSA",max:50,cat:"Core",link:"",linkLabel:"",active:true},
+    {id:"a2",name:"P&L",max:50,cat:"Core",link:"",linkLabel:"",active:true},
+    {id:"a3",name:"Reporting",max:50,cat:"Core",link:"",linkLabel:"",active:false},
+    {id:"a4",name:"Daily Tools",max:50,cat:"Core",link:"",linkLabel:"",active:true},
+    {id:"a5",name:"Disposition",max:50,cat:"Core",link:"",linkLabel:"",active:true},
   ];
   const DEF_STUDENTS = [
     {id:"st1",name:"Aaron Lozano",branch:"1011",bm:"Tony Leo",sup:"Sindy Hernandez",pw:"6195",removed:false,grades:{a1:50,a2:45,a3:0,a4:50,a5:45},att:{}},
@@ -581,8 +592,8 @@ window.addEventListener("fbReady", function() {
   function getSessions(){ return objToArr(cls()&&cls().sessions).sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); }); }
   function objToArr(o){ return o?Object.values(o):[]; }
   function arrToObj(arr){ var o={}; arr.forEach(function(x){ o[x.id]=x; }); return o; }
-  function getTotal(stu,assigns){ return assigns.reduce(function(s,a){ return s+(isNaN(stu.grades&&stu.grades[a.id])?0:Number(stu.grades[a.id])); },0); }
-  function getMax(assigns){ return assigns.reduce(function(s,a){ return s+a.max; },0); }
+  function getTotal(stu,assigns){ return assigns.filter(function(a){return a.active!==false;}).reduce(function(s,a){ return s+(isNaN(stu.grades&&stu.grades[a.id])?0:Number(stu.grades[a.id])); },0); }
+  function getMax(assigns){ return assigns.filter(function(a){return a.active!==false;}).reduce(function(s,a){ return s+a.max; },0); }
   function getPct(stu,assigns){ var mx=getMax(assigns); return mx?getTotal(stu,assigns)/mx:0; }
   function absences(stu,sessions){ return sessions.filter(function(s){ return (stu.att&&stu.att[s.id])==="A"; }).length; }
   function gradeColor(p){ return p>=.80?"#10b981":p>=.60?"#38bdf8":p>=.40?"#f59e0b":"#ef4444"; }
@@ -727,8 +738,34 @@ window.addEventListener("fbReady", function() {
     if(abs>=2){ wb.style.display="flex"; wb.className="att-warn att-danger"; wb.innerHTML='⚠️ <strong>You have '+abs+' unexcused absence'+(abs>1?"s":"")+'.</strong>&nbsp; 2 or more absences may result in removal from the program.'; }
     else if(abs===1){ wb.style.display="flex"; wb.className="att-warn"; wb.innerHTML='📌 You have <strong>1 unexcused absence</strong>. A second absence may result in removal.'; }
     else wb.style.display="none";
-    el("stuCards").innerHTML=assigns.map(function(a){ var v=(stu.grades&&stu.grades[a.id])||0; var c=barColor(a.max?v/a.max:0); return'<div class="sc"><div class="sc-lbl">'+a.name+'</div><div class="sc-val" style="color:'+c+'">'+v+'<span class="sc-max">/'+a.max+'</span></div></div>'; }).join("");
-    el("stuRows").innerHTML=assigns.map(function(a){ var v=(stu.grades&&stu.grades[a.id])||0; var p=a.max?v/a.max:0; var c=barColor(p); var lnk=a.link?'<a href="'+a.link+'" target="_blank" style="color:var(--accent);font-size:.78rem;margin-left:.5rem">🔗 '+(a.linkLabel||"View")+'</a>':""; return'<tr><td><span style="font-weight:600">'+a.name+'</span><span class="ar-badge" style="margin-left:.5rem">'+a.cat+'</span>'+lnk+'</td><td style="color:'+c+';font-weight:700">'+v+'</td><td style="color:var(--muted)">'+a.max+'</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:'+Math.round(p*100)+'%;background:'+c+'"></div></div><span class="bar-sc" style="color:'+c+'">'+Math.round(p*100)+'%</span></div></td></tr>'; }).join("")||'<tr><td colspan="4" class="empty">No assignments yet</td></tr>';
+    el("stuCards").innerHTML=assigns.map(function(a){
+      var isActive=a.active!==false;
+      var v=(stu.grades&&stu.grades[a.id])||0;
+      var c=isActive?barColor(a.max?v/a.max:0):"var(--muted)";
+      var valHtml=isActive?(v+'<span class="sc-max">/'+a.max+'</span>'):'<span style="color:var(--muted);font-size:1.2rem">—</span>';
+      return'<div class="sc" style="'+(isActive?'':'opacity:.55')+'">'+
+        '<div class="sc-lbl">'+a.name+'</div>'+
+        '<div class="sc-val" style="color:'+c+'">'+valHtml+'</div>'+
+        (!isActive?'<div style="font-size:.68rem;color:var(--muted);margin-top:.25rem">Not yet counted</div>':'')+
+      '</div>';
+    }).join("");
+    el("stuRows").innerHTML=assigns.map(function(a){
+      var isActive=a.active!==false;
+      var v=(stu.grades&&stu.grades[a.id])||0;
+      var p=a.max?v/a.max:0;
+      var c=isActive?barColor(p):"var(--muted)";
+      var lnk=a.link?'<a href="'+a.link+'" target="_blank" style="color:var(--accent);font-size:.78rem;margin-left:.5rem">🔗 '+(a.linkLabel||"View")+'</a>':"";
+      var pendingBadge=isActive?'':'<span style="background:rgba(148,163,184,.15);color:var(--muted);border:1px solid var(--border);border-radius:4px;padding:1px 7px;font-size:.68rem;font-weight:600;margin-left:.4rem">Pending</span>';
+      var scoreCell=isActive?('<td style="color:'+c+';font-weight:700">'+v+'</td>'):'<td style="color:var(--muted);font-size:1.1rem;font-weight:700">—</td>';
+      var maxCell=isActive?('<td style="color:var(--muted)">'+a.max+'</td>'):'<td style="color:var(--muted)">'+a.max+'</td>';
+      var barCell=isActive?
+        '<td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:'+Math.round(p*100)+'%;background:'+c+'"></div></div><span class="bar-sc" style="color:'+c+'">'+Math.round(p*100)+'%</span></div></td>':
+        '<td style="color:var(--muted);font-size:.82rem">Not yet counted</td>';
+      return'<tr style="'+(isActive?'':'opacity:.6')+'">'+
+        '<td><span style="font-weight:600">'+a.name+'</span>'+pendingBadge+'<span class="ar-badge" style="margin-left:.4rem">'+a.cat+'</span>'+lnk+'</td>'+
+        scoreCell+maxCell+barCell+
+      '</tr>';
+    }).join("")||'<tr><td colspan="4" class="empty">No assignments yet</td></tr>';
     el("stuAttRows").innerHTML=sessions.length?sessions.map(function(s){ var st=(stu.att&&stu.att[s.id])||"P"; var c=attColor(st); return'<tr><td style="font-weight:600">'+s.name+'</td><td style="color:var(--muted)">'+(s.date||"—")+'</td><td><span class="g-pill" style="background:'+c+'22;color:'+c+';border:1px solid '+c+'44">'+attLabel(st)+'</span></td></tr>'; }).join(""):'<tr><td colspan="3" class="empty">No sessions recorded</td></tr>';
   }
 
@@ -778,7 +815,11 @@ window.addEventListener("fbReady", function() {
       return'<tr class="'+(stu.removed?"removed-row":"")+" "+rankClass+'">'+
         '<td><span class="name-link" data-id="'+stu.id+'">'+rankHtml+stu.name+(stu.removed?'<span class="removed-tag" style="margin-left:.4rem">OUT</span>':'')+'</span></td>'+
         '<td style="color:var(--muted)">'+(stu.branch||"—")+'</td>'+
-        assigns.map(function(a){ return'<td style="text-align:center">'+(stu.grades&&stu.grades[a.id]!==undefined?stu.grades[a.id]:0)+'</td>'; }).join("")+
+        assigns.map(function(a){
+          var isActive=a.active!==false;
+          var v=stu.grades&&stu.grades[a.id]!==undefined?stu.grades[a.id]:0;
+          return'<td style="text-align:center;color:'+(isActive?"inherit":"var(--muted)")+'">'+(isActive?v:'—')+'</td>';
+        }).join("")+
         '<td style="font-weight:700;color:'+gradeColor(pct)+'">'+total+'</td>'+
         '<td><span class="pct-pill" style="background:'+gradeColor(pct)+'22;color:'+gradeColor(pct)+';border:1px solid '+gradeColor(pct)+'44">'+Math.round(pct*100)+'%</span></td>'+
         '<td style="font-weight:700;color:'+absColor+'">'+abs+'</td>'+
@@ -842,8 +883,20 @@ window.addEventListener("fbReady", function() {
   function renderAssignments(){
     el("assignList").innerHTML=getAssigns().length?
       getAssigns().map(function(a){
-        return'<div class="assign-row">'+
-          '<div class="ar-name"><span class="name-link" style="cursor:pointer" onclick="APP.openMassGrade(\''+a.id+'\')">'+a.name+'</span> <span class="ar-badge">'+a.cat+'</span></div>'+
+        var isActive=a.active!==false;
+        return'<div class="assign-row'+(isActive?"":" inactive")+'">'+
+          // Toggle switch
+          '<div class="assign-toggle">'+
+            '<div class="toggle-track'+(isActive?" active":"")+'" onclick="APP.toggleAssignActive(\''+a.id+'\')">'+
+              '<div class="toggle-knob"></div>'+
+            '</div>'+
+            '<span class="toggle-lbl">'+(isActive?"Active":"Inactive")+'</span>'+
+          '</div>'+
+          '<div class="ar-name">'+
+            '<span class="name-link" style="cursor:pointer" onclick="APP.openMassGrade(\''+a.id+'\')">'+a.name+'</span>'+
+            ' <span class="ar-badge">'+a.cat+'</span>'+
+            (!isActive?'<span style="font-size:.72rem;color:var(--muted);margin-left:.5rem">Not counted in scores</span>':'')+
+          '</div>'+
           '<div class="ar-max">Max: '+a.max+' pts</div>'+
           (a.link?'<a class="ar-link" href="'+a.link+'" target="_blank">🔗 '+(a.linkLabel||a.link)+'</a>':'<span style="color:var(--muted);font-size:.8rem">No link</span>')+
           '<button class="ebtn" onclick="APP.openEditAssign(\''+a.id+'\')">Edit</button>'+
@@ -1042,7 +1095,18 @@ window.addEventListener("fbReady", function() {
       '<div class="stu-detail-card"><div class="sdc-lbl">Absences</div><div class="sdc-val" style="color:'+(abs>=2?"#ef4444":abs===1?"#f59e0b":"#10b981")+'">'+abs+(abs>=2?" ⚠️":"")+'</div></div>'+
       (rankPos>=0&&rankPos<=2?'<div class="stu-detail-card" style="grid-column:1/-1"><div class="sdc-lbl">Class Rank</div><div class="sdc-val">'+["🥇 #1 — Top of Class","🥈 #2 in Class","🥉 #3 in Class"][rankPos]+'</div></div>':"");
     el("sdAssignTable").innerHTML='<div class="sec-title" style="margin-bottom:.5rem">Grades</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Assignment</th><th>Score</th><th>Max</th><th>%</th></tr></thead><tbody>'+
-      assigns.map(function(a){ var v=(stu.grades&&stu.grades[a.id])||0; var p=a.max?v/a.max:0; var c=barColor(p); return'<tr><td>'+a.name+'</td><td style="color:'+c+';font-weight:700">'+v+'</td><td style="color:var(--muted)">'+a.max+'</td><td style="color:'+c+'">'+Math.round(p*100)+'%</td></tr>'; }).join("")+
+      assigns.map(function(a){
+        var isActive=a.active!==false;
+        var v=(stu.grades&&stu.grades[a.id])||0;
+        var p=a.max?v/a.max:0;
+        var c=isActive?barColor(p):"var(--muted)";
+        return'<tr style="'+(isActive?'':'opacity:.55')+'">'+
+          '<td>'+a.name+(isActive?'':'<span style="font-size:.7rem;color:var(--muted);margin-left:.4rem">Pending</span>')+'</td>'+
+          '<td style="color:'+c+';font-weight:700">'+(isActive?v:'—')+'</td>'+
+          '<td style="color:var(--muted)">'+a.max+'</td>'+
+          '<td style="color:'+c+'">'+(isActive?Math.round(p*100)+'%':'—')+'</td>'+
+        '</tr>';
+      }).join("")+
       '</tbody></table></div>';
     el("sdAttTable").innerHTML=sessions.length?
       '<div class="sec-title" style="margin-bottom:.5rem;margin-top:1rem">Attendance</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Session</th><th>Date</th><th>Status</th></tr></thead><tbody>'+
@@ -1099,6 +1163,16 @@ window.addEventListener("fbReady", function() {
   }
 
   // ===================== ASSIGNMENT MODAL =====================
+  function toggleAssignActive(aid){
+    var cl=cls();
+    var a=cl.assignments[aid]; if(!a) return;
+    a.active = a.active===false ? true : false;
+    cl.assignments[aid]=a;
+    scheduleSave();
+    renderAll();
+    showToast(a.active?"Assignment activated — included in scores":"Assignment deactivated — showing as dash","ok");
+  }
+
   function openAddAssign(){
     _editAssignId=null;
     el("amTitle").textContent="Add Assignment";
@@ -1128,7 +1202,7 @@ window.addEventListener("fbReady", function() {
       cl.assignments[_editAssignId]=a;
     } else {
       var newId=uid();
-      cl.assignments[newId]={id:newId,name:name,max:max,cat:el("amCat").value,link:el("amLink").value.trim(),linkLabel:el("amLinkLabel").value.trim()};
+      cl.assignments[newId]={id:newId,name:name,max:max,cat:el("amCat").value,link:el("amLink").value.trim(),linkLabel:el("amLinkLabel").value.trim(),active:false};
       objToArr(cl.students).forEach(function(s){ if(!s.grades) s.grades={}; if(s.grades[newId]===undefined){ s.grades[newId]=0; cl.students[s.id]=s; } });
     }
     scheduleSave(); closeAll(); renderAll(); showToast("Assignment saved","ok");
@@ -1180,7 +1254,7 @@ window.addEventListener("fbReady", function() {
   // ===================== APP NAMESPACE (accessible from onclick) =====================
   window.APP = {
     openEditStudent:openEditStudent, openStuDetail:openStuDetail,
-    openEditAssign:openEditAssign, openMassGrade:openMassGrade,
+    openEditAssign:openEditAssign, openMassGrade:openMassGrade, toggleAssignActive:toggleAssignActive,
     openEditSession:openEditSession, toggleAtt:toggleAtt,
     setActiveClass:function(id){ activeClassId=id; el("admClassSel").value=id; renderAll(); showToast("Active class switched","ok"); },
     openStuDetailModal:openStuDetail
