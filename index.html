@@ -532,40 +532,70 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
 <div class="toast" id="toast"></div>
 
 <!-- FIREBASE -->
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" onerror="window._fbFailed=true"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" onerror="window._fbFailed=true"></script>
+<!-- Firebase SDK via unpkg CDN -->
 <script>
 window._fbdb = null;
 window._firebaseReady = false;
-try {
-  firebase.initializeApp({
-    apiKey:"AIzaSyDzfVLkWeExs8KTSSMMAw0E5e5KwMfYo9c",
-    authDomain:"gp1-gradebook.firebaseapp.com",
-    databaseURL:"https://gp1-gradebook-default-rtdb.firebaseio.com",
-    projectId:"gp1-gradebook",
-    storageBucket:"gp1-gradebook.firebasestorage.app",
-    messagingSenderId:"984231332046",
-    appId:"1:984231332046:web:b5b5d9fbae86f85427689f"
-  });
-  window._fbdb = firebase.database();
-  window._firebaseReady = true;
-} catch(e) {
-  console.warn("Firebase init failed:", e);
-  window._firebaseReady = false;
+
+function _loadScript(url, cb) {
+  var s = document.createElement("script");
+  s.src = url;
+  s.onload = cb;
+  s.onerror = function() {
+    console.warn("Failed to load:", url);
+    window._firebaseReady = false;
+    // App starts anyway via seedDefault
+  };
+  document.head.appendChild(s);
 }
+
+_loadScript("https://unpkg.com/firebase@10.8.0/firebase-app-compat.js", function() {
+  _loadScript("https://unpkg.com/firebase@10.8.0/firebase-database-compat.js", function() {
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp({
+          apiKey:"AIzaSyDzfVLkWeExs8KTSSMMAw0E5e5KwMfYo9c",
+          authDomain:"gp1-gradebook.firebaseapp.com",
+          databaseURL:"https://gp1-gradebook-default-rtdb.firebaseio.com",
+          projectId:"gp1-gradebook",
+          storageBucket:"gp1-gradebook.firebasestorage.app",
+          messagingSenderId:"984231332046",
+          appId:"1:984231332046:web:b5b5d9fbae86f85427689f"
+        });
+      }
+      window._fbdb = firebase.database();
+      window._firebaseReady = true;
+      console.log("Firebase ready");
+    } catch(e) {
+      console.warn("Firebase init failed:", e);
+      window._firebaseReady = false;
+    }
+  });
+});
 </script>
 
 <!-- Main app -->
 <script>
 (function() {
-  // Firebase - use if available, otherwise run locally
-  var _fbdb = window._fbdb || null;
-  var _useFirebase = window._firebaseReady && _fbdb !== null;
+  var _fbdb = null;
+  var _useFirebase = false;
 
   function startApp() {
-    _fbdb = window._fbdb || null;
-    _useFirebase = window._firebaseReady && _fbdb !== null;
+    // Give Firebase up to 5 seconds to load, then start regardless
+    var waited = 0;
+    function tryStart() {
+      _fbdb = window._fbdb || null;
+      _useFirebase = window._firebaseReady && _fbdb !== null;
+      if (_useFirebase || waited >= 5000) {
+        loadData();
+      } else {
+        waited += 200;
+        setTimeout(tryStart, 200);
+      }
+    }
+    // Wire all buttons first so UI is responsive
+    wireButtons();
+    tryStart();
 
   // ===================== DEFAULTS =====================
   const DEF_ASSIGNS = [
@@ -754,7 +784,7 @@ try {
     buildLoginUI();
   }
 
-  loadData();
+  // loadData called by tryStart()
 
   // ===================== LOGIN =====================
   function buildLoginUI(){
@@ -1422,6 +1452,7 @@ try {
   };
 
   // ===================== BUTTON WIRING =====================
+  function wireButtons() {
   function wire(id,fn){ var b=el(id); if(b) b.onclick=fn; }
   wire("signInBtn", handleLogin);
   wire("stuLogoutBtn", logout);
@@ -1469,6 +1500,7 @@ try {
   var st=document.createElement("style");
   st.textContent=".ebtn{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);color:var(--accent);border-radius:6px;padding:3px 10px;font-size:.78rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;transition:all .15s;margin:0 2px}.ebtn:hover{background:rgba(56,189,248,.22)}";
   document.head.appendChild(st);
+  } // end wireButtons
   } // end startApp
 
   if(document.readyState === "loading") {
