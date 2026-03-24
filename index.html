@@ -247,9 +247,12 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
       <h1>Gradebook Portal</h1>
       <p>Sign in to view your grades and attendance</p>
     </div>
-    <div class="class-sw">
+    <div id="activeClassDisplay" style="display:flex;align-items:center;gap:.5rem;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.6rem 1rem;margin-bottom:1.5rem;font-size:.85rem;">
       <span>📚</span>
-      <select id="loginClassSel"></select>
+      <span style="color:var(--muted2)">Class:</span>
+      <span id="activeClassName" style="color:var(--accent);font-weight:700">Loading...</span>
+      <!-- hidden select still needed for populateNames logic -->
+      <select id="loginClassSel" style="display:none"></select>
     </div>
     <div class="fg">
       <label>Your Name</label>
@@ -367,7 +370,7 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
       <div class="sec-title" style="margin-bottom:1rem">Current Class Averages</div>
       <div class="avg-grid" id="avgGrid"></div>
       <div class="sec-title" style="margin:1.5rem 0 1rem">Class Comparison — All Cohorts</div>
-      <div class="compare-wrap"><table class="compare-tbl"><thead><tr><th>Class</th><th>Students</th><th>Avg Score</th><th>Avg %</th><th>Pass Rate</th><th>Rank</th></tr></thead><tbody id="compareBody"></tbody></table></div>
+      <div class="compare-wrap"><table class="compare-tbl"><thead><tr><th>Class</th><th>Students</th><th>Avg %</th><th>Pass Rate</th><th>Rank</th></tr></thead><tbody id="compareBody"></tbody></table></div>
     </div>
 
     <!-- CLASSES -->
@@ -449,7 +452,7 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
       <div class="fg mfull"><label>Assignment Name</label><input type="text" id="amName" /></div>
       <div class="fg"><label>Max Points</label><input type="number" id="amMax" min="1" value="50" /></div>
       <div class="fg"><label>Category</label>
-        <select id="amCat"><option>Core</option><option>Bonus</option><option>Project</option><option>Attendance</option></select>
+        <select id="amCat"><option>Knowledge Check</option><option>Bonus</option><option>Relief Assignment</option><option>Attendance</option></select>
       </div>
       <div class="fg mfull"><label>Resource Link (URL)</label><input type="url" id="amLink" placeholder="https://..." /></div>
       <div class="fg mfull"><label>Link Label</label><input type="text" id="amLinkLabel" placeholder="e.g. Assignment Instructions" /></div>
@@ -491,6 +494,23 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
     <div class="m-actions">
       <button class="btn-save" id="clsSaveBtn">Create Class</button>
       <button class="btn-cancel" onclick="closeAll()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Class Modal -->
+<div class="overlay" id="editClassModal">
+  <div class="modal">
+    <h3>✏️ Edit Class</h3>
+    <div class="mg">
+      <div class="fg mfull"><label>Class Name</label><input type="text" id="ecName" /></div>
+      <div class="fg"><label>Start Date</label><input type="date" id="ecStart" /></div>
+      <div class="fg"><label>End Date</label><input type="date" id="ecEnd" /></div>
+    </div>
+    <div class="m-actions">
+      <button class="btn-save" id="ecSaveBtn">Save Changes</button>
+      <button class="btn-cancel" onclick="closeAll()">Cancel</button>
+      <button class="btn-danger" id="ecDeleteBtn">Delete Class</button>
     </div>
   </div>
 </div>
@@ -537,11 +557,11 @@ window.addEventListener("fbReady", function() {
 
   // ===================== DEFAULTS =====================
   const DEF_ASSIGNS = [
-    {id:"a1",name:"BSA",max:50,cat:"Core",link:"",linkLabel:"",active:true},
-    {id:"a2",name:"P&L",max:50,cat:"Core",link:"",linkLabel:"",active:true},
-    {id:"a3",name:"Reporting",max:50,cat:"Core",link:"",linkLabel:"",active:false},
-    {id:"a4",name:"Daily Tools",max:50,cat:"Core",link:"",linkLabel:"",active:true},
-    {id:"a5",name:"Disposition",max:50,cat:"Core",link:"",linkLabel:"",active:true},
+    {id:"a1",name:"BSA",max:50,cat:"Knowledge Check",link:"",linkLabel:"",active:true},
+    {id:"a2",name:"P&L",max:50,cat:"Knowledge Check",link:"",linkLabel:"",active:true},
+    {id:"a3",name:"Reporting",max:50,cat:"Knowledge Check",link:"",linkLabel:"",active:false},
+    {id:"a4",name:"Daily Tools",max:50,cat:"Knowledge Check",link:"",linkLabel:"",active:true},
+    {id:"a5",name:"Disposition",max:50,cat:"Knowledge Check",link:"",linkLabel:"",active:true},
   ];
   const DEF_STUDENTS = [
     {id:"st1",name:"Aaron Lozano",branch:"1011",bm:"Tony Leo",sup:"Sindy Hernandez",pw:"6195",removed:false,grades:{a1:50,a2:45,a3:0,a4:50,a5:45},att:{}},
@@ -592,7 +612,19 @@ window.addEventListener("fbReady", function() {
   function getSessions(){ return objToArr(cls()&&cls().sessions).sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); }); }
   function objToArr(o){ return o?Object.values(o):[]; }
   function arrToObj(arr){ var o={}; arr.forEach(function(x){ o[x.id]=x; }); return o; }
-  function getTotal(stu,assigns){ return assigns.filter(function(a){return a.active!==false;}).reduce(function(s,a){ return s+(isNaN(stu.grades&&stu.grades[a.id])?0:Number(stu.grades[a.id])); },0); }
+  var ABSENCE_DEDUCTION = 21;
+  function getAbsDeduction(stu,sessions){
+    var abs=sessions.filter(function(s){ return (stu.att&&stu.att[s.id])==="A"; }).length;
+    return abs * ABSENCE_DEDUCTION;
+  }
+  function getTotal(stu,assigns){
+    var raw=assigns.filter(function(a){return a.active!==false;}).reduce(function(s,a){ return s+(isNaN(stu.grades&&stu.grades[a.id])?0:Number(stu.grades[a.id])); },0);
+    var deduction=getAbsDeduction(stu,getSessions());
+    return Math.max(0, raw - deduction);
+  }
+  function getRawTotal(stu,assigns){
+    return assigns.filter(function(a){return a.active!==false;}).reduce(function(s,a){ return s+(isNaN(stu.grades&&stu.grades[a.id])?0:Number(stu.grades[a.id])); },0);
+  }
   function getMax(assigns){ return assigns.filter(function(a){return a.active!==false;}).reduce(function(s,a){ return s+a.max; },0); }
   function getPct(stu,assigns){ var mx=getMax(assigns); return mx?getTotal(stu,assigns)/mx:0; }
   function absences(stu,sessions){ return sessions.filter(function(s){ return (stu.att&&stu.att[s.id])==="A"; }).length; }
@@ -600,7 +632,27 @@ window.addEventListener("fbReady", function() {
   function barColor(p){ return p>=.85?"#10b981":p>=.70?"#38bdf8":p>=.50?"#f59e0b":"#ef4444"; }
   function attColor(s){ return s==="P"?"#10b981":s==="A"?"#ef4444":"#f59e0b"; }
   function attLabel(s){ return s==="P"?"Present":s==="A"?"Absent":"Excused"; }
+  function getRankInfo(students,assigns){
+    // Returns map of studentId -> {rank:1/2/3, tied:true/false}
+    var active=students.filter(function(s){ return !s.removed; })
+      .sort(function(a,b){ return getPct(b,assigns)-getPct(a,assigns); });
+    var rankMap={};
+    var i=0;
+    while(i<active.length){
+      var curPct=getPct(active[i],assigns);
+      // Find all at same pct
+      var j=i;
+      while(j<active.length && Math.abs(getPct(active[j],assigns)-curPct)<0.0001) j++;
+      var group=active.slice(i,j);
+      var rank=i+1; // 1-based
+      var tied=group.length>1;
+      group.forEach(function(s){ rankMap[s.id]={rank:rank,tied:tied}; });
+      i=j;
+    }
+    return rankMap;
+  }
   function getTop3(students,assigns){
+    // Legacy: returns array of top-3 ids (first 3 unique ranks)
     return students.filter(function(s){ return !s.removed; })
       .sort(function(a,b){ return getPct(b,assigns)-getPct(a,assigns); })
       .slice(0,3).map(function(s){ return s.id; });
@@ -680,11 +732,17 @@ window.addEventListener("fbReady", function() {
     sel.innerHTML=Object.values(classes).map(function(c){
       return '<option value="'+c.id+'">'+c.name+'</option>';
     }).join("");
+    // Set to active class
+    sel.value=activeClassId;
+    var activeCl=classes[activeClassId];
+    var nameEl=el("activeClassName");
+    if(nameEl) nameEl.textContent=activeCl?activeCl.name:"No active class";
     populateNames();
   }
 
   function populateNames(){
-    var cid=el("loginClassSel").value;
+    // Always use activeClassId for login — only active class shown
+    var cid=activeClassId;
     var cl=classes[cid];
     var sel=el("nameSelect");
     sel.innerHTML='<option value="">— Select your name —</option>'+
@@ -715,8 +773,8 @@ window.addEventListener("fbReady", function() {
     var cl=cls(); var assigns=getAssigns(); var sessions=getSessions();
     var stu=cl.students[_curStuId]; if(!stu) return;
     var total=getTotal(stu,assigns), mx=getMax(assigns), pct=mx?total/mx:0;
-    var top3=getTop3(getStudents(),assigns);
-    var rankPos=top3.indexOf(stu.id);
+    var rankMap=getRankInfo(getStudents(),assigns);
+    var myRank=rankMap[stu.id]||{rank:99,tied:false};
     var initials=stu.name.split(" ").map(function(w){ return w[0]; }).join("").slice(0,2).toUpperCase();
     el("topName").textContent=stu.name;
     el("stuAvatar").textContent=initials;
@@ -729,9 +787,9 @@ window.addEventListener("fbReady", function() {
     var passing=pct>=0.80;
     var srow=el("stuStatusRow");
     var sh='<span class="pass-pill" style="background:'+(passing?"rgba(16,185,129,.18)":"rgba(239,68,68,.18)")+';color:'+(passing?"#10b981":"#ef4444")+';border:1px solid '+(passing?"rgba(16,185,129,.4)":"rgba(239,68,68,.4)")+'">'+(passing?"✓ Passing":"✗ Needs Improvement")+'</span>';
-    if(rankPos===0) sh+='<span class="top3-badge" style="background:rgba(245,158,11,.2);color:#f59e0b;border:1px solid rgba(245,158,11,.4)">🥇 Top of Class</span>';
-    else if(rankPos===1) sh+='<span class="top3-badge" style="background:rgba(148,163,184,.15);color:#94a3b8;border:1px solid rgba(148,163,184,.3)">🥈 #2 in Class</span>';
-    else if(rankPos===2) sh+='<span class="top3-badge" style="background:rgba(205,127,50,.15);color:#cd7f32;border:1px solid rgba(205,127,50,.3)">🥉 #3 in Class</span>';
+    if(myRank.rank===1) sh+='<span class="top3-badge" style="background:rgba(245,158,11,.2);color:#f59e0b;border:1px solid rgba(245,158,11,.4)">🥇 '+(myRank.tied?"Tied for #1":"Top of Class")+'</span>';
+    else if(myRank.rank===2) sh+='<span class="top3-badge" style="background:rgba(148,163,184,.15);color:#94a3b8;border:1px solid rgba(148,163,184,.3)">🥈 '+(myRank.tied?"Tied for #2":"#2 in Class")+'</span>';
+    else if(myRank.rank===3) sh+='<span class="top3-badge" style="background:rgba(205,127,50,.15);color:#cd7f32;border:1px solid rgba(205,127,50,.3)">🥉 '+(myRank.tied?"Tied for #3":"#3 in Class")+'</span>';
     srow.innerHTML=sh;
     var abs=absences(stu,sessions);
     var wb=el("attWarnBanner");
@@ -799,19 +857,22 @@ window.addEventListener("fbReady", function() {
   function renderRoster(){
     var assigns=getAssigns(); var sessions=getSessions();
     var students=getStudents().slice();
-    var top3=getTop3(students,assigns);
+    var rankMap=getRankInfo(students,assigns);
     if(_sortByGrade) students.sort(function(a,b){ return getPct(b,assigns)-getPct(a,assigns); });
     el("rosterHead").innerHTML='<tr><th>Name</th><th>Branch</th>'+
       assigns.map(function(a){ return'<th>'+a.name+'<br><span style="font-weight:400;color:var(--muted2)">/'+a.max+'</span></th>'; }).join("")+
       '<th>Total</th><th>%</th><th>Abs</th><th>Pass</th><th>PW</th><th></th></tr>';
     el("rosterBody").innerHTML=students.map(function(stu){
       var total=getTotal(stu,assigns),mx=getMax(assigns),pct=mx?total/mx:0;
-      var rankPos=top3.indexOf(stu.id);
+      var myRank=rankMap[stu.id]||{rank:99,tied:false};
       var abs=absences(stu,sessions);
+      var absDeduct=getAbsDeduction(stu,sessions);
       var absColor=abs>=2?"#ef4444":abs===1?"#f59e0b":"#10b981";
       var passing=pct>=0.80;
-      var rankClass=rankPos===0?"rank-1":rankPos===1?"rank-2":rankPos===2?"rank-3":"";
-      var rankHtml=rankPos>=0&&rankPos<=2?'<span class="rank-badge">'+["🥇","🥈","🥉"][rankPos]+'</span>':"";
+      var rankClass=myRank.rank===1?"rank-1":myRank.rank===2?"rank-2":myRank.rank===3?"rank-3":"";
+      var medal=myRank.rank===1?"🥇":myRank.rank===2?"🥈":myRank.rank===3?"🥉":"";
+      var tiedLabel=myRank.tied?" (Tied)":"";
+      var rankHtml=myRank.rank<=3?'<span class="rank-badge" title="'+medal+(myRank.rank<=3?"#"+myRank.rank:"")+tiedLabel+'">'+medal+'</span>':"";
       return'<tr class="'+(stu.removed?"removed-row":"")+" "+rankClass+'">'+
         '<td><span class="name-link" data-id="'+stu.id+'">'+rankHtml+stu.name+(stu.removed?'<span class="removed-tag" style="margin-left:.4rem">OUT</span>':'')+'</span></td>'+
         '<td style="color:var(--muted)">'+(stu.branch||"—")+'</td>'+
@@ -822,7 +883,7 @@ window.addEventListener("fbReady", function() {
         }).join("")+
         '<td style="font-weight:700;color:'+gradeColor(pct)+'">'+total+'</td>'+
         '<td><span class="pct-pill" style="background:'+gradeColor(pct)+'22;color:'+gradeColor(pct)+';border:1px solid '+gradeColor(pct)+'44">'+Math.round(pct*100)+'%</span></td>'+
-        '<td style="font-weight:700;color:'+absColor+'">'+abs+'</td>'+
+        '<td style="font-weight:700;color:'+absColor+'" title="'+abs+' absence(s) × 21pt deduction = -'+absDeduct+'pts">'+abs+(absDeduct>0?' <span style=\"font-size:.7rem;color:#ef4444\">(-'+absDeduct+')</span>':'')+'</td>'+
         '<td style="font-size:.8rem;color:'+(passing?"#10b981":"#ef4444")+';font-weight:700">'+(passing?"Pass":"Below")+'</td>'+
         '<td style="color:var(--muted);font-size:.78rem">'+stu.pw+'</td>'+
         '<td><button class="ebtn" onclick="APP.openEditStudent(\''+stu.id+'\')">Info</button></td>'+
@@ -907,16 +968,28 @@ window.addEventListener("fbReady", function() {
 
   // ===================== AVERAGES =====================
   function renderAverages(){
-    var assigns=getAssigns();
+    var assigns=getAssigns().filter(function(a){ return a.active!==false; });
     var active=getStudents().filter(function(s){ return !s.removed&&getTotal(s,assigns)>0; });
-    function avg(fn){ return active.length?(active.reduce(function(s,st){ return s+fn(st); },0)/active.length).toFixed(1):"—"; }
-    el("avgGrid").innerHTML=[].concat(
-      assigns.map(function(a){ return {label:a.name,val:avg(function(s){ return (s.grades&&s.grades[a.id])||0; }),max:a.max}; }),
-      [{label:"Total Avg",val:avg(function(s){ return getTotal(s,assigns); }),max:getMax(assigns)}]
-    ).map(function(item){
-      var p=item.max&&item.val!=="—"?item.val/item.max:0;
-      var c=item.val==="—"?"var(--muted)":barColor(p);
-      return'<div class="avg-card"><div class="avg-val" style="color:'+c+'">'+item.val+'</div><div class="avg-lbl">'+item.label+'<br><span style="opacity:.5">/ '+item.max+'</span></div></div>';
+    function avgPctFor(fn,max){
+      if(!active.length||!max) return null;
+      var avgRaw=active.reduce(function(s,st){ return s+fn(st); },0)/active.length;
+      return avgRaw/max;
+    }
+    var items=[].concat(
+      assigns.map(function(a){ return {label:a.name,pct:avgPctFor(function(s){ return (s.grades&&s.grades[a.id])||0; },a.max)}; }),
+      [{label:"Class Average",pct:avgPctFor(function(s){ return getTotal(s,assigns); },getMax(assigns))}]
+    );
+    el("avgGrid").innerHTML=items.map(function(item){
+      if(item.pct===null) return'<div class="avg-card"><div class="avg-val" style="color:var(--muted)">—</div><div class="avg-lbl">'+item.label+'</div></div>';
+      var pctVal=Math.round(item.pct*100);
+      var c=pctVal>=80?"#10b981":"#ef4444";
+      var border=pctVal>=80?"rgba(16,185,129,.25)":"rgba(239,68,68,.25)";
+      var bg=pctVal>=80?"rgba(16,185,129,.07)":"rgba(239,68,68,.07)";
+      return'<div class="avg-card" style="border-color:'+border+';background:'+bg+'">'+
+        '<div class="avg-val" style="color:'+c+'">'+pctVal+'%</div>'+
+        '<div class="avg-lbl">'+item.label+'</div>'+
+        '<div style="margin-top:.4rem"><div class="bar-bg" style="height:4px"><div class="bar-fill" style="width:'+pctVal+'%;background:'+c+'"></div></div></div>'+
+      '</div>';
     }).join("");
     // Cross-class comparison
     var rows=Object.values(classes).map(function(cl){
@@ -934,8 +1007,7 @@ window.addEventListener("fbReady", function() {
       return'<tr class="'+(isCur?"cur-class":"")+'">'+
         '<td>'+(isCur?"→ ":"")+'<strong>'+r.name+'</strong></td>'+
         '<td>'+r.count+'</td>'+
-        '<td style="color:'+barColor(r.avgPct)+';font-weight:700">'+r.avgScore.toFixed(1)+'</td>'+
-        '<td><span class="pct-pill" style="background:'+barColor(r.avgPct)+'22;color:'+barColor(r.avgPct)+';border:1px solid '+barColor(r.avgPct)+'44">'+Math.round(r.avgPct*100)+'%</span></td>'+
+        '<td style="color:'+(r.avgPct>=0.80?"#10b981":"#ef4444")+';font-weight:700">'+Math.round(r.avgPct*100)+'%</td>'+
         '<td>'+Math.round(r.passRate*100)+'%</td>'+
         '<td>'+medal+' #'+(i+1)+'</td>'+
       '</tr>';
@@ -946,12 +1018,16 @@ window.addEventListener("fbReady", function() {
   function renderClasses(){
     el("classesList").innerHTML=Object.values(classes).map(function(c){
       var sts=objToArr(c.students).filter(function(s){ return !s.removed; });
-      return'<div class="class-row '+(c.id===activeClassId?"class-active":"")+'">'+
-        '<div>'+
-          '<div class="cr-name">'+c.name+(c.id===activeClassId?' <span class="info-chip" style="color:var(--accent)">Active</span>':'')+'</div>'+
+      var isActive=c.id===activeClassId;
+      return'<div class="class-row'+(isActive?" class-active":"")+'" style="cursor:pointer" onclick="APP.openEditClass(''+c.id+'')">'+
+        '<div style="flex:1">'+
+          '<div class="cr-name">'+c.name+(isActive?' <span class="info-chip" style="color:var(--accent)">Active</span>':'')+'</div>'+
           '<div class="cr-info">'+sts.length+' students · '+objToArr(c.assignments).length+' assignments · '+(c.start||"?")+' → '+(c.end||"?")+'</div>'+
         '</div>'+
-        '<button class="ebtn" onclick="APP.setActiveClass(\''+c.id+'\')">Set Active</button>'+
+        '<div style="display:flex;gap:.5rem;flex-shrink:0">'+
+          (isActive?'':'<button class="ebtn" onclick="event.stopPropagation();APP.setActiveClass(''+c.id+'')">Set Active</button>')+
+          '<button class="ebtn" onclick="event.stopPropagation();APP.openEditClass(''+c.id+'')">✏️ Edit</button>'+
+        '</div>'+
       '</div>';
     }).join("");
   }
@@ -1083,8 +1159,9 @@ window.addEventListener("fbReady", function() {
     var stu=cls().students[stuId]; if(!stu) return;
     var total=getTotal(stu,assigns),mx=getMax(assigns),pct=mx?total/mx:0;
     var abs=absences(stu,sessions);
-    var top3=getTop3(getStudents(),assigns);
-    var rankPos=top3.indexOf(stu.id);
+    var rankMap=getRankInfo(getStudents(),assigns);
+    var myRank=rankMap[stu.id]||{rank:99,tied:false};
+    var absDeduct=getAbsDeduction(stu,getSessions());
     var passing=pct>=0.80;
     el("sdTitle").textContent="👤 "+stu.name;
     el("sdScoreCards").innerHTML=
@@ -1093,7 +1170,12 @@ window.addEventListener("fbReady", function() {
       '<div class="stu-detail-card"><div class="sdc-lbl">Status</div><div class="sdc-val" style="color:'+(passing?"#10b981":"#ef4444");
     el("sdScoreCards").innerHTML+=';font-size:1.1rem">'+(passing?"✓ Passing":"✗ Below 80%")+'</div></div>'+
       '<div class="stu-detail-card"><div class="sdc-lbl">Absences</div><div class="sdc-val" style="color:'+(abs>=2?"#ef4444":abs===1?"#f59e0b":"#10b981")+'">'+abs+(abs>=2?" ⚠️":"")+'</div></div>'+
-      (rankPos>=0&&rankPos<=2?'<div class="stu-detail-card" style="grid-column:1/-1"><div class="sdc-lbl">Class Rank</div><div class="sdc-val">'+["🥇 #1 — Top of Class","🥈 #2 in Class","🥉 #3 in Class"][rankPos]+'</div></div>':"");
+      (absDeduct>0?'<div class="stu-detail-card"><div class="sdc-lbl">Absence Deduction</div><div class="sdc-val" style="color:#ef4444">-'+absDeduct+' pts</div></div>':'')+
+      (myRank.rank<=3?'<div class="stu-detail-card" style="grid-column:1/-1"><div class="sdc-lbl">Class Rank</div><div class="sdc-val">'+
+        (myRank.rank===1?(myRank.tied?"🥇 Tied for #1":"🥇 #1 — Top of Class"):
+         myRank.rank===2?(myRank.tied?"🥈 Tied for #2":"🥈 #2 in Class"):
+         (myRank.tied?"🥉 Tied for #3":"🥉 #3 in Class"))+
+      '</div></div>':"");
     el("sdAssignTable").innerHTML='<div class="sec-title" style="margin-bottom:.5rem">Grades</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Assignment</th><th>Score</th><th>Max</th><th>%</th></tr></thead><tbody>'+
       assigns.map(function(a){
         var isActive=a.active!==false;
@@ -1217,10 +1299,41 @@ window.addEventListener("fbReady", function() {
   }
 
   // ===================== CLASS MODAL =====================
+  var _editClassId=null;
+
   function openAddClass(){
     ["clsName","clsStart","clsEnd"].forEach(function(id){ el(id).value=""; });
     el("clsStart").value=new Date().toISOString().split("T")[0];
     openModal("classModal");
+  }
+
+  function openEditClass(cid){
+    _editClassId=cid;
+    var c=classes[cid]; if(!c) return;
+    el("ecName").value=c.name;
+    el("ecStart").value=c.start||"";
+    el("ecEnd").value=c.end||"";
+    openModal("editClassModal");
+  }
+
+  function saveEditClass(){
+    var c=classes[_editClassId]; if(!c) return;
+    var name=el("ecName").value.trim();
+    if(!name){ showToast("Class name required","bad"); return; }
+    c.name=name; c.start=el("ecStart").value; c.end=el("ecEnd").value;
+    classes[_editClassId]=c;
+    scheduleSave(); closeAll(); buildAdmClassSel(); buildLoginUI(); renderAll();
+    showToast("Class updated","ok");
+  }
+
+  function deleteClass(){
+    var c=classes[_editClassId]; if(!c) return;
+    if(_editClassId===activeClassId){ showToast("Cannot delete the active class. Set another class as active first.","bad"); return; }
+    var stuCount=objToArr(c.students).length;
+    if(!confirm("Delete ""+c.name+""? This will permanently remove "+stuCount+" students and all their data. This cannot be undone.")) return;
+    delete classes[_editClassId];
+    scheduleSave(); closeAll(); buildAdmClassSel(); buildLoginUI(); renderAll();
+    showToast("Class deleted","ok");
   }
 
   function saveClass(){
@@ -1255,6 +1368,7 @@ window.addEventListener("fbReady", function() {
   window.APP = {
     openEditStudent:openEditStudent, openStuDetail:openStuDetail,
     openEditAssign:openEditAssign, openMassGrade:openMassGrade, toggleAssignActive:toggleAssignActive,
+    openEditClass:openEditClass,
     openEditSession:openEditSession, toggleAtt:toggleAtt,
     setActiveClass:function(id){ activeClassId=id; el("admClassSel").value=id; renderAll(); showToast("Active class switched","ok"); },
     openStuDetailModal:openStuDetail
@@ -1278,6 +1392,8 @@ window.addEventListener("fbReady", function() {
   wire("addClassBtn", openAddClass);
   wire("addClassBtn2", openAddClass);
   wire("clsSaveBtn", saveClass);
+  wire("ecSaveBtn", saveEditClass);
+  wire("ecDeleteBtn", deleteClass);
   wire("chgPwBtn", function(){ el("pwErr").style.display="none"; openModal("chgPwModal"); });
   wire("pwSaveBtn", savePassword);
   wire("sortGradeBtn", function(){ _sortByGrade=!_sortByGrade; renderRoster(); });
