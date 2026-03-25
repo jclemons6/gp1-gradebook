@@ -26,7 +26,7 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 .login-logo{text-align:center;margin-bottom:2rem}
 .chip{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;padding:5px 14px;border-radius:50px;font-size:10.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem}
-.login-logo h1{font-family:'Syne',sans-serif;font-size:2.1rem;font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1}
+.login-logo h1{font-family:sans-serif;font-size:2.1rem;font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1}
 .login-logo p{color:var(--muted2);font-size:.875rem;margin-top:.5rem}
 .class-sw{display:flex;align-items:center;gap:.5rem;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.6rem 1rem;margin-bottom:1.5rem}
 .class-sw select{flex:1;background:transparent;border:none;color:var(--accent);font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;outline:none;cursor:pointer}
@@ -37,7 +37,7 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
 .fg select{cursor:pointer}.fg select option{background:var(--surface2)}
 .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(56,189,248,.14)}
 .fg textarea{resize:vertical;min-height:80px}
-.btn-primary{width:100%;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border:none;border-radius:10px;padding:.9rem;font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:all .2s;margin-top:.25rem}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border:none;border-radius:10px;padding:.9rem;font-family:sans-serif;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:all .2s;margin-top:.25rem}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(26,86,219,.4)}
 .err{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5;border-radius:8px;padding:.7rem 1rem;font-size:.85rem;margin-top:.9rem;display:none}
 .admin-link{text-align:center;margin-top:1.4rem;font-size:.8rem;color:var(--muted)}
@@ -45,7 +45,7 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
 
 /* TOPBAR */
 .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.9rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;gap:1rem;flex-wrap:wrap}
-.topbar-brand{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;background:linear-gradient(135deg,#fff,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap}
+.topbar-brand{font-family:sans-serif;font-weight:800;font-size:1.05rem;background:linear-gradient(135deg,#fff,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap}
 .topbar-right{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
 .btn-logout{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.28);color:#fca5a5;border-radius:8px;padding:.45rem 1rem;font-family:'DM Sans',sans-serif;font-size:.83rem;cursor:pointer;transition:all .2s;font-weight:600}
 .btn-logout:hover{background:rgba(239,68,68,.2)}
@@ -72,12 +72,12 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
 .stu-body{padding:2rem;max-width:920px;margin:0 auto;width:100%;animation:fadeUp .4s ease}
 .hero{background:linear-gradient(135deg,var(--surface2),var(--navy2));border:1px solid var(--border);border-radius:20px;padding:2rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.5rem;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;background:radial-gradient(circle,rgba(56,189,248,.1),transparent 70%);border-radius:50%}
-.avatar{width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--accent));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 0 0 4px rgba(56,189,248,.18)}
-.stu-info h2{font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:700}
+.avatar{width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--accent));display:flex;align-items:center;justify-content:center;font-family:sans-serif;font-size:1.6rem;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 0 0 4px rgba(56,189,248,.18)}
+.stu-info h2{font-family:sans-serif;font-size:1.45rem;font-weight:700}
 .stu-meta{color:var(--muted2);font-size:.84rem;margin-top:.25rem}
 .stu-meta span{margin-right:1rem}
 .score-hero{margin-left:auto;text-align:right;flex-shrink:0}
-.score-big{font-family:'Syne',sans-serif;font-size:3rem;font-weight:800;line-height:1}
+.score-big{font-family:sans-serif;font-size:3rem;font-weight:800;line-height:1}
 .score-lbl{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:.2rem}
 .pass-pill{display:inline-block;padding:4px 14px;border-radius:50px;font-size:.82rem;font-weight:700;margin-top:.5rem}
 .top3-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:50px;font-size:.78rem;font-weight:700;margin-top:.4rem;margin-left:.4rem}
@@ -87,9 +87,9 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
 .sc{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.15rem;transition:border-color .2s}
 .sc:hover{border-color:var(--border2)}
 .sc-lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:.45rem}
-.sc-val{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:700}
+.sc-val{font-family:sans-serif;font-size:1.7rem;font-weight:700}
 .sc-max{font-size:.85rem;color:var(--muted);margin-left:3px}
-.sec-title{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.85rem}
+.sec-title{font-family:sans-serif;font-size:.85rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.85rem}
 .tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.5rem}
 .tbl{width:100%;border-collapse:collapse}
 .tbl th{background:var(--surface2);padding:.7rem 1.2rem;text-align:left;font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
@@ -104,7 +104,7 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
 #adminScreen{min-height:100vh;flex-direction:column}
 .adm-body{padding:2rem;max-width:1300px;margin:0 auto;width:100%;animation:fadeUp .4s ease}
 .adm-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
-.adm-header h1{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800}
+.adm-header h1{font-family:sans-serif;font-size:1.7rem;font-weight:800}
 .adm-class-row{display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap}
 .adm-class-sel{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:.6rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;cursor:pointer;min-width:200px}
 .adm-class-sel option{background:var(--surface2)}
@@ -173,7 +173,7 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
 /* AVERAGES + COMPARISON */
 .avg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem}
 .avg-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem;text-align:center}
-.avg-val{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800}
+.avg-val{font-family:sans-serif;font-size:2rem;font-weight:800}
 .avg-lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:.3rem}
 .compare-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
 .compare-tbl{width:100%;border-collapse:collapse}
@@ -194,12 +194,12 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
 .overlay.open{display:flex}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:2rem;width:100%;max-width:560px;box-shadow:0 30px 70px rgba(0,0,0,.55);animation:fadeUp .3s ease;max-height:92vh;overflow-y:auto}
 .modal-wide{max-width:800px}
-.modal h3{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:1.4rem;display:flex;align-items:center;gap:.5rem}
+.modal h3{font-family:sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:1.4rem;display:flex;align-items:center;gap:.5rem}
 .mg{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
 .mg .fg{margin-bottom:0}
 .mfull{grid-column:1/-1}
 .m-actions{display:flex;gap:.75rem;margin-top:1.4rem;flex-wrap:wrap}
-.btn-save{flex:1;min-width:100px;background:linear-gradient(135deg,var(--green),#059669);color:#fff;border:none;border-radius:10px;padding:.75rem;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-save{flex:1;min-width:100px;background:linear-gradient(135deg,var(--green),#059669);color:#fff;border:none;border-radius:10px;padding:.75rem;font-family:sans-serif;font-weight:700;cursor:pointer;transition:all .2s}
 .btn-save:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(16,185,129,.4)}
 .btn-cancel{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:10px;padding:.75rem 1.2rem;font-family:'DM Sans',sans-serif;font-size:.9rem;cursor:pointer;transition:all .2s}
 .btn-cancel:hover{border-color:rgba(255,255,255,.3);color:var(--text)}
@@ -210,7 +210,7 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
 .stu-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
 .stu-detail-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:1rem}
 .stu-detail-card .sdc-lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:.5rem}
-.stu-detail-card .sdc-val{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700}
+.stu-detail-card .sdc-val{font-family:sans-serif;font-size:1.4rem;font-weight:700}
 
 /* UTIL */
 .add-btn{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border:none;border-radius:9px;padding:.55rem 1.1rem;font-family:'DM Sans',sans-serif;font-size:.83rem;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.4rem;white-space:nowrap}
@@ -414,7 +414,7 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
 
       <!-- Setup instructions (shown when no data) -->
       <div id="prodSetupGuide" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:2rem;margin-bottom:1.5rem">
-        <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:.75rem">How to load your Snowflake production data</div>
+        <div style="font-family:sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:.75rem">How to load your Snowflake production data</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-bottom:1.5rem">
           <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:1.1rem">
             <div style="font-weight:700;color:var(--accent);font-size:.8rem;letter-spacing:1px;margin-bottom:.5rem">STEP 1 — OPEN SNOWFLAKE</div>
@@ -437,29 +437,39 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
         <div style="font-family:monospace;font-size:.78rem;color:#7dd3fc;line-height:1.8;background:var(--navy);padding:1.25rem;border-radius:10px;overflow:auto;border:1px solid var(--border)">
 <span style="color:#a78bfa">SELECT</span><br>
 &nbsp;&nbsp;<span style="color:#fde68a">e.EMPLOYEE_NAME</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Name"</span>,<br>
-&nbsp;&nbsp;<span style="color:#fde68a">e.BRANCH_NUMBER</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Branch"</span>,<br><br>
-&nbsp;&nbsp;<span style="color:#94a3b8">-- Call metrics</span><br>
-&nbsp;&nbsp;<span style="color:#fde68a">p.TOTAL_CALLS_HANDLED</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Calls_Total"</span>,<br>
-&nbsp;&nbsp;<span style="color:#fde68a">ROUND(p.TOTAL_CALLS_HANDLED / NULLIF(p.DAYS_WORKED,0), 1)</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Calls_Per_Day"</span>,<br><br>
-&nbsp;&nbsp;<span style="color:#94a3b8">-- Applications</span><br>
-&nbsp;&nbsp;<span style="color:#fde68a">p.TOTAL_APPLICATIONS</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Apps_Total"</span>,<br>
-&nbsp;&nbsp;<span style="color:#fde68a">ROUND(p.TOTAL_APPLICATIONS / NULLIF(p.DAYS_WORKED,0), 1)</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Apps_Per_Day"</span>,<br><br>
-&nbsp;&nbsp;<span style="color:#94a3b8">-- Loans by product type</span><br>
-&nbsp;&nbsp;<span style="color:#fde68a">p.LOANS_TOTAL</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Loans_Total"</span>,<br>
+&nbsp;&nbsp;<span style="color:#94a3b8">-- App metrics vs median</span><br>
+&nbsp;&nbsp;<span style="color:#fde68a">p.APPS_TOTAL</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Apps"</span>,<br>
+&nbsp;&nbsp;<span style="color:#fde68a">m.MEDIAN_APPS</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Company_Median_Apps"</span>,<br>
+&nbsp;&nbsp;<span style="color:#fde68a">ROUND(p.APPS_TOTAL/NULLIF(m.MEDIAN_APPS,0)*100)</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Apps_vs_Median_Pct"</span>,<br>
+&nbsp;&nbsp;<span style="color:#fde68a">p.APPS_FUNDED</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Apps_Funded"</span>,<br>
+&nbsp;&nbsp;<span style="color:#94a3b8">-- Loan metrics vs median</span><br>
+&nbsp;&nbsp;<span style="color:#fde68a">p.LOANS_TOTAL</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Loans"</span>,<br>
+&nbsp;&nbsp;<span style="color:#fde68a">m.MEDIAN_LOANS</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Company_Median_Loans"</span>,<br>
+&nbsp;&nbsp;<span style="color:#fde68a">ROUND(p.LOANS_TOTAL/NULLIF(m.MEDIAN_LOANS,0)*100)</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Loans_vs_Median_Pct"</span>,<br>
+&nbsp;&nbsp;<span style="color:#fde68a">p.LOANS_SMALL</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Loans_Small"</span>,<br>
+&nbsp;&nbsp;<span style="color:#fde68a">p.LOANS_LARGE</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Loans_Large"</span>,<br>
 &nbsp;&nbsp;<span style="color:#fde68a">p.LOANS_AUTO</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Loans_Auto"</span>,<br>
-&nbsp;&nbsp;<span style="color:#fde68a">p.LOANS_PERSONAL</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Loans_Personal"</span>,<br>
-&nbsp;&nbsp;<span style="color:#fde68a">p.LOANS_MORTGAGE</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Loans_Mortgage"</span>,<br>
-&nbsp;&nbsp;<span style="color:#fde68a">p.LOANS_STUDENT</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Loans_Student"</span>,<br><br>
-&nbsp;&nbsp;<span style="color:#94a3b8">-- Insurance / CPL</span><br>
-&nbsp;&nbsp;<span style="color:#fde68a">p.INSURANCE_SALES</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Insurance_Sales"</span>,<br>
-&nbsp;&nbsp;<span style="color:#fde68a">p.CPL_SCORE</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"CPL"</span>,<br><br>
-&nbsp;&nbsp;<span style="color:#94a3b8">-- Revenue</span><br>
-&nbsp;&nbsp;<span style="color:#fde68a">p.TOTAL_REVENUE</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Revenue_Total"</span><br><br>
+&nbsp;&nbsp;<span style="color:#fde68a">m.MEDIAN_AUTO</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Company_Median_Auto"</span>,<br>
+&nbsp;&nbsp;<span style="color:#94a3b8">-- Volume vs median</span><br>
+&nbsp;&nbsp;<span style="color:#fde68a">p.VOLUME_FINANCED</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Volume_Financed"</span>,<br>
+&nbsp;&nbsp;<span style="color:#fde68a">m.MEDIAN_VOLUME</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Company_Median_Volume"</span>,<br>
+&nbsp;&nbsp;<span style="color:#fde68a">ROUND(p.VOLUME_FINANCED/NULLIF(m.MEDIAN_VOLUME,0)*100)</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Volume_vs_Median_Pct"</span>,<br>
+&nbsp;&nbsp;<span style="color:#fde68a">p.AUTO_VOLUME</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Auto_Volume"</span>,<br>
+&nbsp;&nbsp;<span style="color:#94a3b8">-- Insurance vs median</span><br>
+&nbsp;&nbsp;<span style="color:#fde68a">p.INSURANCE_PREMIUM</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Insurance_Premium"</span>,<br>
+&nbsp;&nbsp;<span style="color:#fde68a">m.MEDIAN_INSURANCE</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Company_Median_Insurance"</span>,<br>
+&nbsp;&nbsp;<span style="color:#94a3b8">-- Performance tier</span><br>
+&nbsp;&nbsp;<span style="color:#f9a8d4">CASE</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f9a8d4">WHEN</span> p.APPS_TOTAL=0 <span style="color:#f9a8d4">AND</span> p.LOANS_TOTAL=0 <span style="color:#f9a8d4">THEN</span> <span style="color:#fff">'NO ACTIVITY'</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f9a8d4">WHEN</span> ROUND(p.LOANS_TOTAL/NULLIF(m.MEDIAN_LOANS,0)*100) &lt; 70 <span style="color:#f9a8d4">THEN</span> <span style="color:#fff">'BELOW MEDIAN'</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f9a8d4">WHEN</span> ROUND(p.LOANS_TOTAL/NULLIF(m.MEDIAN_LOANS,0)*100) &lt; 90 <span style="color:#f9a8d4">THEN</span> <span style="color:#fff">'SLIGHTLY BELOW'</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f9a8d4">WHEN</span> ROUND(p.LOANS_TOTAL/NULLIF(m.MEDIAN_LOANS,0)*100) &lt; 120 <span style="color:#f9a8d4">THEN</span> <span style="color:#fff">'AT MEDIAN'</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f9a8d4">ELSE</span> <span style="color:#fff">'ABOVE MEDIAN'</span><br>
+&nbsp;&nbsp;<span style="color:#f9a8d4">END</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"vs_Company"</span><br><br>
 <span style="color:#a78bfa">FROM</span> <span style="color:#fde68a">EMPLOYEES e</span><br>
 <span style="color:#a78bfa">JOIN</span> <span style="color:#fde68a">PRODUCTION_METRICS p</span> <span style="color:#a78bfa">ON</span> e.EMPLOYEE_ID = p.EMPLOYEE_ID<br>
-<span style="color:#a78bfa">WHERE</span> p.REPORT_DATE &gt;= <span style="color:#f9a8d4">DATEADD</span>(day, -30, <span style="color:#f9a8d4">CURRENT_DATE</span>())<br>
-<span style="color:#a78bfa">AND</span> e.EMPLOYEE_NAME <span style="color:#a78bfa">IN</span> (<br>
-&nbsp;&nbsp;<span style="color:#94a3b8">-- Paste your class roster names here, one per line:</span><br>
+<span style="color:#a78bfa">JOIN</span> <span style="color:#fde68a">COMPANY_MEDIANS m</span> <span style="color:#a78bfa">ON</span> m.PERIOD = p.PERIOD<br>
+<span style="color:#a78bfa">WHERE</span> e.EMPLOYEE_NAME <span style="color:#a78bfa">IN</span> (<br>
 &nbsp;&nbsp;<span style="color:#fff">'Aaron Lozano', 'Alene Mckissick', 'Amber Gallegos', 'Amy Taylor',</span><br>
 &nbsp;&nbsp;<span style="color:#fff">'Ana Aguilar', 'Ana Garza', 'Arely Herrera', 'Ashley Thomas',</span><br>
 &nbsp;&nbsp;<span style="color:#fff">'Austin Jones', 'Carrie Turner', 'Christina Moore', 'Cynthia Lewis',</span><br>
@@ -1609,6 +1619,56 @@ _loadScript("https://unpkg.com/firebase@10.8.0/firebase-app-compat.js", function
     openEditStudent:openEditStudent, openStuDetail:openStuDetail,
     openEditAssign:openEditAssign, openMassGrade:openMassGrade, toggleAssignActive:toggleAssignActive,
     openEditClass:openEditClass,
+    sortProd:function(key){
+      if(_prodSortKey===key) _prodSortDir*=-1;
+      else { _prodSortKey=key; _prodSortDir=-1; }
+      renderProduction();
+    },
+    getAIInsight:function(stuId){
+      var box=document.getElementById("insight_"+stuId);
+      if(!box) return;
+      var prod=getProdData();
+      var assigns=getAssigns();
+      var stu=cls().students[stuId]; if(!stu) return;
+      var pct=getPct(stu,assigns);
+      var stuKey=stu.name.trim().toLowerCase().replace(/ +/g," ");
+      var pm=Object.values(prod).find(function(p){
+        return p.name&&p.name.trim().toLowerCase().replace(/ +/g," ")===stuKey;
+      })||null;
+      if(!pm||!pm.raw){box.textContent="No production data found.";return;}
+      box.innerHTML='<span style="color:var(--accent)">Generating…</span>';
+      var r=pm.raw;
+      var prompt="You are a banking training manager and performance coach. Analyze this trainee and give 2-3 sentences of specific, actionable coaching insight. Be direct, concrete, and motivating.\n\n"+
+        "Trainee: "+stu.name+"\n"+
+        "Classroom Score: "+Math.round(pct*100)+"%\n"+
+        "Performance vs Company Median: "+(r["vs_Company"]||"Unknown")+"\n\n"+
+        "Key Metrics vs Company Median:\n"+
+        "  Apps: "+r["Apps"]+" vs median "+r["Company_Median_Apps"]+" ("+r["Apps_vs_Median_Pct"]+"% of median)\n"+
+        "  Loans: "+r["Loans"]+" vs median "+r["Company_Median_Loans"]+" ("+r["Loans_vs_Median_Pct"]+"% of median)\n"+
+        "  Volume Financed: $"+parseFloat(r["Volume_Financed"]||0).toLocaleString()+" vs median $"+parseFloat(r["Company_Median_Volume"]||0).toLocaleString()+" ("+r["Volume_vs_Median_Pct"]+"% of median)\n"+
+        "  Auto Loans: "+r["Loans_Auto"]+" (median: "+r["Company_Median_Auto"]+")\n"+
+        "  Auto Volume: $"+parseFloat(r["Auto_Volume"]||0).toLocaleString()+"\n"+
+        "  Insurance Premium: $"+parseFloat(r["Insurance_Premium"]||0).toLocaleString()+" vs median $"+parseFloat(r["Company_Median_Insurance"]||0).toLocaleString()+"\n\n"+
+        "Context: This person is currently in a training program. The goal is to understand if the training program is helping or hurting their production vs peers.\n"+
+        "Answer: What is their standout strength? What is their most concerning gap? What one specific action should they take this week to improve?";
+      fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          model:"claude-sonnet-4-20250514",
+          max_tokens:1000,
+          messages:[{role:"user",content:prompt}]
+        })
+      }).then(function(res){return res.json();})
+      .then(function(data){
+        var txt=data.content&&data.content[0]&&data.content[0].text;
+        if(txt){box.textContent=txt;box.style.color="var(--text)";}
+        else box.textContent="No insight returned.";
+      }).catch(function(e){
+        box.textContent="Insight unavailable.";
+        console.error(e);
+      });
+    },
     openEditSession:openEditSession, toggleAtt:toggleAtt,
     setActiveClass:function(id){ activeClassId=id; el("admClassSel").value=id; renderAll(); showToast("Active class switched","ok"); },
     openStuDetailModal:openStuDetail
@@ -1625,167 +1685,306 @@ _loadScript("https://unpkg.com/firebase@10.8.0/firebase-app-compat.js", function
 
   // Metric groups for display
   var PROD_GROUPS = [
-    { label:"Calls", keys:["Calls_Total","Calls_Per_Day"], icon:"📞" },
-    { label:"Applications", keys:["Apps_Total","Apps_Per_Day"], icon:"📋" },
-    { label:"Loans", keys:["Loans_Total","Loans_Auto","Loans_Personal","Loans_Mortgage","Loans_Student"], icon:"🏦" },
-    { label:"Insurance / CPL", keys:["Insurance_Sales","CPL"], icon:"🛡️" },
-    { label:"Revenue", keys:["Revenue_Total"], icon:"💰" },
+    { label:"Applications", icon:"📋", keys:[
+      {k:"Apps",                    label:"Apps",           tip:"Total applications taken"},
+      {k:"Apps_vs_Median_Pct",      label:"vs Median %",    fmt:"pct",   tip:"Apps vs company median %"},
+      {k:"Apps_Funded",             label:"Funded",         tip:"Apps funded"},
+      {k:"Company_Median_Apps",     label:"Median Apps",    tip:"Company median apps",  median:true}
+    ]},
+    { label:"Loans", icon:"🏦", keys:[
+      {k:"Loans",                   label:"Loans",          tip:"Total loans"},
+      {k:"Loans_vs_Median_Pct",     label:"vs Median %",    fmt:"pct",   tip:"Loans vs company median %"},
+      {k:"Loans_Small",             label:"Small",          tip:"Small loans"},
+      {k:"Loans_Large",             label:"Large",          tip:"Large loans"},
+      {k:"Loans_Auto",              label:"Auto",           tip:"Auto loans"},
+      {k:"Company_Median_Loans",    label:"Median Loans",   tip:"Company median loans", median:true}
+    ]},
+    { label:"Volume", icon:"💵", keys:[
+      {k:"Volume_Financed",         label:"Vol Financed",   fmt:"dollar", tip:"Total volume financed"},
+      {k:"Volume_vs_Median_Pct",    label:"vs Median %",    fmt:"pct",    tip:"Volume vs company median %"},
+      {k:"Auto_Volume",             label:"Auto Vol",       fmt:"dollar", tip:"Auto loan volume"},
+      {k:"Company_Median_Volume",   label:"Median Vol",     fmt:"dollar", tip:"Company median volume", median:true}
+    ]},
+    { label:"Insurance", icon:"🛡️", keys:[
+      {k:"Insurance_Premium",       label:"Premium $",      fmt:"dollar", tip:"Insurance premium total"},
+      {k:"Company_Median_Insurance",label:"Median Ins",     fmt:"dollar", tip:"Company median insurance", median:true}
+    ]}
   ];
 
-  function fmtVal(k, v) {
-    if(v === null || v === undefined || v === "" || v === "—") return "—";
-    var n = parseFloat(v);
-    if(isNaN(n)) return v;
-    if(k === "Revenue_Total") return "$"+n.toLocaleString(undefined,{maximumFractionDigits:0});
-    if(k === "CPL") return "$"+n.toFixed(2);
-    if(k.indexOf("Per_Day") >= 0) return n.toFixed(1);
+  var PROD_METRICS = [];
+  PROD_GROUPS.forEach(function(g){ g.keys.forEach(function(m){ PROD_METRICS.push(m); }); });
+
+  var _prodSortKey = "vs_Company_rank";
+  var _prodSortDir = 1;
+
+  function fmtVal(fmt, v) {
+    if(v===null||v===undefined||v===""||v==="—") return "—";
+    var n=parseFloat(v); if(isNaN(n)) return String(v);
+    if(fmt==="dollar") return "$"+n.toLocaleString(undefined,{maximumFractionDigits:0});
+    if(fmt==="pct")    return n.toFixed(1)+"%";
     return n.toLocaleString(undefined,{maximumFractionDigits:0});
+  }
+  function fmtMetric(m,v){ return fmtVal(m?m.fmt:null,v); }
+
+  // vs_Company tier config
+  var VS_TIERS = [
+    { key:"NO ACTIVITY", rank:0, label:"No Activity",      color:"#6b7280", bg:"rgba(107,114,128,.15)", min:0,   max:0   },
+    { key:"BELOW MEDIAN",   rank:1, label:"Below Median (<70%)",   color:"#ef4444", bg:"rgba(239,68,68,.15)",    min:0,   max:69  },
+    { key:"SLIGHTLY BELOW", rank:2, label:"Slightly Below (70-89%)",color:"#f97316",bg:"rgba(249,115,22,.15)",   min:70,  max:89  },
+    { key:"AT MEDIAN",      rank:3, label:"At Median (90-119%)",    color:"#f59e0b", bg:"rgba(245,158,11,.15)",  min:90,  max:119 },
+    { key:"ABOVE MEDIAN",   rank:4, label:"Above Median (120%+)",   color:"#10b981", bg:"rgba(16,185,129,.15)", min:120, max:9999}
+  ];
+
+  function getTier(vsKey) {
+    return VS_TIERS.find(function(t){ return t.key===vsKey; }) || VS_TIERS[0];
   }
 
   function renderProduction() {
-    var prod = getProdData();
-    var students = getStudents().filter(function(s){ return !s.removed; });
-    var assigns = getAssigns();
-    var hasProd = Object.keys(prod).length > 0;
-    var cl = cls();
+    var prod=getProdData();
+    var students=getStudents().filter(function(s){return !s.removed;});
+    var assigns=getAssigns();
+    var hasProd=Object.keys(prod).length>0;
+    var cl=cls();
+    el("prodSetupGuide").style.display=hasProd?"none":"block";
+    el("prodTableWrap").style.display=hasProd?"block":"none";
+    el("prodSummaryCards").style.display=hasProd?"grid":"none";
+    el("prodLastSync").textContent=(cl&&cl.prodLastSync)?cl.prodLastSync:"Never synced";
+    if(!hasProd) return;
 
-    el("prodSetupGuide").style.display = hasProd ? "none" : "block";
-    el("prodTableWrap").style.display = hasProd ? "block" : "none";
-    el("prodSummaryCards").style.display = hasProd ? "grid" : "none";
-    el("prodLastSync").textContent = (cl && cl.prodLastSync) ? cl.prodLastSync : "Never synced";
-
-    if (!hasProd) return;
-
-    // Detect which columns are actually present in the data
-    var availableKeys = [];
-    Object.values(prod).forEach(function(p) {
-      if(p.raw) Object.keys(p.raw).forEach(function(k){
-        if(availableKeys.indexOf(k) < 0 && k !== "Branch") availableKeys.push(k);
-      });
-    });
-
-    // Build max values for bar scaling
-    var maxes = {};
-    availableKeys.forEach(function(k){
-      var vals = Object.values(prod).map(function(p){ return parseFloat((p.raw&&p.raw[k])||0)||0; });
-      maxes[k] = Math.max.apply(null, vals) || 1;
-    });
-
-    // Summary cards — class averages per metric group
-    el("prodSummaryCards").innerHTML = PROD_GROUPS.map(function(g){
-      var groupKeys = g.keys.filter(function(k){ return availableKeys.indexOf(k)>=0; });
-      if(!groupKeys.length) return "";
-      var matched = Object.values(prod).filter(function(p){ return p.raw; });
-      var avgLine = groupKeys.map(function(k){
-        var avg = matched.length ? matched.reduce(function(s,p){ return s+(parseFloat((p.raw&&p.raw[k])||0)||0); },0)/matched.length : 0;
-        return '<div style="font-size:.75rem;color:var(--muted2)">'+k.replace(/_/g," ")+': <strong style="color:var(--text)">'+fmtVal(k,avg)+'</strong></div>';
-      }).join("");
-      return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem">'+
-        '<div style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem">'+g.icon+' '+g.label+'</div>'+
-        avgLine+'</div>';
-    }).join("");
-
-    // Build visible group columns for table
-    var visGroups = PROD_GROUPS.filter(function(g){
-      return g.keys.some(function(k){ return availableKeys.indexOf(k)>=0; });
-    });
-
-    // Header
-    el("prodHead").innerHTML = "<tr>" +
-      "<th style='position:sticky;left:0;background:var(--surface2);z-index:10'>Name</th>" +
-      "<th>Class %</th>" +
-      visGroups.map(function(g){
-        var gkeys = g.keys.filter(function(k){ return availableKeys.indexOf(k)>=0; });
-        return gkeys.map(function(k){
-          return "<th>"+g.icon+" "+k.replace(/_/g,"<br>")+"</th>";
-        }).join("");
-      }).join("") +
-      "<th>Insight</th>" +
-      "</tr>";
-
-    // Sort by class pct descending
-    var sorted = students.slice().sort(function(a,b){
-      return getPct(b,assigns)-getPct(a,assigns);
-    });
-
-    el("prodBody").innerHTML = sorted.map(function(stu){
-      var total = getTotal(stu,assigns);
-      var mx = getMax(assigns);
-      var pct = mx ? total/mx : 0;
-      var pColor = pct>=0.80?"#10b981":pct>=0.60?"#38bdf8":"#ef4444";
-
-      // Match by name case-insensitive
-      var stuKey = stu.name.trim().toLowerCase();
-      var prodMatch = null;
-      Object.values(prod).forEach(function(p){
-        if(p.name && p.name.trim().toLowerCase()===stuKey) prodMatch=p;
-      });
-
-      var metricCells = visGroups.map(function(g){
-        var gkeys = g.keys.filter(function(k){ return availableKeys.indexOf(k)>=0; });
-        return gkeys.map(function(k){
-          if(!prodMatch||!prodMatch.raw||prodMatch.raw[k]===undefined||prodMatch.raw[k]==="")
-            return '<td style="color:var(--muted);text-align:center">—</td>';
-          var raw = parseFloat(prodMatch.raw[k])||0;
-          var ratio = maxes[k]?raw/maxes[k]:0;
-          var c = ratio>=0.75?"#10b981":ratio>=0.50?"#38bdf8":ratio>=0.25?"#f59e0b":"#ef4444";
-          return '<td><div class="prod-bar-wrap">'+
-            '<div class="prod-bar-bg"><div class="prod-bar-fill" style="width:'+Math.round(ratio*100)+'%;background:'+c+'"></div></div>'+
-            '<span class="prod-val" style="color:'+c+'">'+fmtVal(k,raw)+'</span>'+
-            '</div></td>';
-        }).join("");
-      }).join("");
-
-      // Insight label
-      var insightHtml = '<span style="color:var(--muted);font-size:.8rem">No data</span>';
-      if(prodMatch && prodMatch.raw) {
-        var numericKeys = availableKeys.filter(function(k){
-          return parseFloat((prodMatch.raw&&prodMatch.raw[k])||"")||0 > 0;
-        });
-        if(numericKeys.length > 0) {
-          var prodAvg = numericKeys.reduce(function(s,k){
-            return s + (parseFloat((prodMatch.raw&&prodMatch.raw[k])||0)||0)/(maxes[k]||1);
-          },0) / numericKeys.length;
-          var diff = pct - prodAvg;
-          if(Math.abs(diff) < 0.12)
-            insightHtml = '<span class="prod-badge" style="background:rgba(16,185,129,.15);color:#10b981">✓ Well Rounded</span>';
-          else if(diff > 0.20)
-            insightHtml = '<span class="prod-badge" style="background:rgba(56,189,248,.15);color:#38bdf8">📚 Class Strength</span>';
-          else if(diff < -0.20)
-            insightHtml = '<span class="prod-badge" style="background:rgba(167,139,250,.15);color:#a78bfa">⚡ Floor Strength</span>';
-          else if(diff > 0)
-            insightHtml = '<span class="prod-badge" style="background:rgba(245,158,11,.15);color:#f59e0b">↑ Class Edge</span>';
-          else
-            insightHtml = '<span class="prod-badge" style="background:rgba(245,158,11,.15);color:#f59e0b">↑ Prod Edge</span>';
+    // Match student to prod record
+    function findProd(stu){
+      var key=stu.name.trim().toLowerCase().replace(/ +/g," ");
+      return Object.values(prod).find(function(p){
+        if(!p.name) return false;
+        var pk=p.name.trim().toLowerCase().replace(/ +/g," ");
+        if(pk===key) return true;
+        var sp=key.split(" "),pp=pk.split(" ");
+        if(sp.length>=2&&pp.length>=2){
+          if(pp.slice(1).join(" ")+" "+pp[0]===key) return true;
+          if(sp.slice(1).join(" ")+" "+sp[0]===pk) return true;
         }
-      }
+        return false;
+      })||null;
+    }
 
-      return "<tr>" +
-        '<td style="position:sticky;left:0;background:var(--surface);font-weight:600;z-index:5">'+stu.name+'</td>' +
-        '<td><span class="pct-pill" style="background:'+pColor+'22;color:'+pColor+';border:1px solid '+pColor+'44">'+Math.round(pct*100)+'%</span></td>' +
-        metricCells +
-        '<td>'+insightHtml+'</td>' +
+    // Build row data
+    var rows=students.map(function(stu){
+      var pm=findProd(stu);
+      var total=getTotal(stu,assigns);
+      var mx=getMax(assigns);
+      var pct=mx?total/mx:0;
+      var vsKey=(pm&&pm.raw&&pm.raw["vs_Company"])||"";
+      var tier=getTier(vsKey);
+      return {stu:stu,pm:pm,total:total,pct:pct,tier:tier,vsKey:vsKey};
+    });
+
+    // ── SUMMARY BANNER ──────────────────────────────────────────────────────
+    // Count by tier
+    var tierCounts={};
+    VS_TIERS.forEach(function(t){ tierCounts[t.key]=[]; });
+    rows.forEach(function(r){
+      if(r.pm&&tierCounts[r.vsKey]!==undefined) tierCounts[r.vsKey].push(r.stu.name.split(" ")[0]);
+    });
+    var withData=rows.filter(function(r){return r.pm&&r.vsKey;});
+
+    var bannerHtml='<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1.25rem">' +
+      '<div style="font-weight:700;font-size:1rem;margin-bottom:1rem">📊 Class vs Company Median — '+withData.length+' of '+students.length+' students matched</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.75rem">' +
+      VS_TIERS.slice().reverse().map(function(t){
+        var names=tierCounts[t.key]||[];
+        if(!names.length&&t.key!=="ABOVE MEDIAN") return "";
+        return '<div style="background:'+t.bg+';border:1px solid '+t.color+'44;border-radius:10px;padding:.85rem">'+
+          '<div style="font-weight:700;color:'+t.color+';font-size:.82rem;margin-bottom:.3rem">'+t.label+'</div>'+
+          '<div style="font-size:1.4rem;font-weight:800;font-family:sans-serif;color:'+t.color+'">'+names.length+'</div>'+
+          (names.length&&t.key!=="ABOVE MEDIAN"?'<div style="font-size:.72rem;color:var(--muted2);margin-top:.25rem">'+names.join(", ")+'</div>':'')+
+          (t.key==="ABOVE MEDIAN"&&names.length?'<div style="font-size:.75rem;color:var(--muted2);margin-top:.25rem">Most of your class is outperforming the typical team member</div>':'')+
+          '</div>';
+      }).join("")+
+      '</div></div>';
+
+    // ── METRIC SUMMARY CARDS ────────────────────────────────────────────────
+    // Find which keys are present
+    var presentKeys={};
+    PROD_METRICS.forEach(function(m){
+      presentKeys[m.k]=Object.values(prod).some(function(p){
+        return p.raw&&p.raw[m.k]!==undefined&&p.raw[m.k]!=="";
+      });
+    });
+
+    el("prodSummaryCards").innerHTML="";
+    el("prodTableWrap").insertAdjacentHTML("beforebegin", bannerHtml);
+    // Only insert banner once
+    var existingBanner=document.getElementById("prodBanner");
+    if(!existingBanner){
+      var bDiv=document.createElement("div");
+      bDiv.id="prodBanner";
+      bDiv.innerHTML=bannerHtml;
+      el("prodTableWrap").parentNode.insertBefore(bDiv, el("prodTableWrap"));
+    } else {
+      existingBanner.innerHTML=bannerHtml;
+    }
+
+    // Sort rows
+    if(_prodSortKey==="class_pct"){
+      rows.sort(function(a,b){return _prodSortDir*(b.pct-a.pct);});
+    } else if(_prodSortKey==="vs_Company_rank"){
+      rows.sort(function(a,b){
+        var diff=_prodSortDir*(b.tier.rank-a.tier.rank);
+        if(diff!==0) return diff;
+        return b.pct-a.pct;
+      });
+    } else if(_prodSortKey){
+      rows.sort(function(a,b){
+        var av=parseFloat((a.pm&&a.pm.raw&&a.pm.raw[_prodSortKey])||0)||0;
+        var bv=parseFloat((b.pm&&b.pm.raw&&b.pm.raw[_prodSortKey])||0)||0;
+        return _prodSortDir*(bv-av);
+      });
+    }
+
+    // Visible metric cols (skip median reference cols in table to keep compact)
+    var visMetrics=PROD_METRICS.filter(function(m){
+      return presentKeys[m.k]&&!m.median;
+    });
+
+    // Max per key
+    var maxes={};
+    visMetrics.forEach(function(m){
+      maxes[m.k]=Math.max.apply(null,[1].concat(Object.values(prod).map(function(p){
+        return parseFloat((p.raw&&p.raw[m.k])||0)||0;
+      })));
+    });
+
+    // Sortable TH
+    function sortTh(key,label,tip){
+      var active=_prodSortKey===key;
+      var arrow=active?(_prodSortDir<0?" ▼":" ▲"):" ⇅";
+      return '<th style="cursor:pointer;white-space:nowrap;user-select:none" title="'+(tip||label)+'" data-sortkey="'+key+'" data-issortth="1">'+label+arrow+'</th>';
+    }
+
+    el("prodHead").innerHTML="<tr>"+
+      '<th style="position:sticky;left:0;background:var(--surface2);z-index:10;min-width:160px">Name</th>'+
+      sortTh("class_pct","Class %","Sort by class score")+
+      sortTh("vs_Company_rank","vs Company","Sort by performance vs median")+
+      visMetrics.map(function(m){return sortTh(m.k,m.label,m.tip);}).join("")+
+      "<th>AI Insight</th></tr>";
+
+    // Wire sort clicks
+    el("prodHead").querySelectorAll("[data-issortth]").forEach(function(th){
+      th.addEventListener("click",function(){ APP.sortProd(th.dataset.sortkey); });
+    });
+
+    el("prodBody").innerHTML=rows.map(function(row){
+      var stu=row.stu,pm=row.pm,pct=row.pct,tier=row.tier;
+      var pColor=pct>=0.80?"#10b981":pct>=0.60?"#38bdf8":"#ef4444";
+
+      // vs Company pill
+      var vsPill=pm&&row.vsKey
+        ?'<span style="background:'+tier.bg+';color:'+tier.color+';border:1px solid '+tier.color+'44;border-radius:50px;padding:2px 10px;font-size:.72rem;font-weight:700">'+tier.label+'</span>'
+        :'<span style="color:var(--muted);font-size:.78rem">No data</span>';
+
+      var metricCells=visMetrics.map(function(m){
+        if(!pm||!pm.raw||pm.raw[m.k]===undefined||pm.raw[m.k]==="")
+          return '<td style="color:var(--muted);text-align:center">—</td>';
+        var raw=parseFloat(pm.raw[m.k])||0;
+        // For pct metrics color based on 100% = median
+        var c;
+        if(m.fmt==="pct"){
+          c=raw>=120?"#10b981":raw>=90?"#f59e0b":raw>=70?"#f97316":"#ef4444";
+        } else {
+          var ratio=maxes[m.k]?raw/maxes[m.k]:0;
+          c=ratio>=0.75?"#10b981":ratio>=0.50?"#38bdf8":ratio>=0.25?"#f59e0b":"#ef4444";
+        }
+        return '<td><div class="prod-bar-wrap">'+
+          '<div class="prod-bar-bg"><div class="prod-bar-fill" style="width:'+Math.min(100,Math.round(m.fmt==="pct"?Math.min(raw,200)/2:maxes[m.k]?raw/maxes[m.k]*100:0))+'%;background:'+c+'"></div></div>'+
+          '<span class="prod-val" style="color:'+c+'">'+fmtMetric(m,raw)+'</span>'+
+          '</div></td>';
+      }).join("");
+
+      var hasData=pm&&pm.raw&&(parseFloat(pm.raw["Apps"]||0)>0||parseFloat(pm.raw["Loans"]||0)>0);
+      var insightCell=hasData
+        ?'<td><button class="ebtn" style="font-size:.75rem;white-space:nowrap" data-stuinsight="'+stu.id+'">✨ Insight</button>'+
+          '<div id="insight_'+stu.id+'" style="font-size:.75rem;color:var(--muted2);margin-top:.3rem;max-width:260px;line-height:1.5"></div></td>'
+        :'<td style="color:var(--muted);font-size:.78rem">No data</td>';
+
+      return "<tr>"+
+        '<td style="position:sticky;left:0;background:var(--surface);z-index:5;font-weight:600">'+stu.name+'</td>'+
+        '<td><span class="pct-pill" style="background:'+pColor+'22;color:'+pColor+';border:1px solid '+pColor+'44">'+Math.round(pct*100)+'%</span></td>'+
+        '<td>'+vsPill+'</td>'+
+        metricCells+
+        insightCell+
         "</tr>";
-    }).join("") || '<tr><td colspan="20" class="empty">No students</td></tr>';
+    }).join("")||'<tr><td colspan="20" class="empty">No students</td></tr>';
+
+    // Wire AI insight buttons
+    el("prodBody").querySelectorAll("[data-stuinsight]").forEach(function(btn){
+      btn.addEventListener("click",function(){ APP.getAIInsight(btn.dataset.stuinsight); });
+    });
   }
 
+
   function parseProdCSV(text) {
-    var NL2=String.fromCharCode(10); var lines=text.trim().split(NL2).map(function(l){return l.trim();});
-    if(lines.length < 2) return null;
-    var headers = lines[0].split(",").map(function(h){ return h.trim().replace(/^"|"$/g,""); });
-    var nameIdx = headers.findIndex(function(h){ return h.toLowerCase()==="name"; });
-    if(nameIdx < 0) { showToast("CSV must have a 'Name' column","bad"); return null; }
+    // Strip BOM if present (common in Snowflake exports)
+    if(text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+
+    // Handle both Windows (\r\n) and Unix (\n) line endings
+    var CR = String.fromCharCode(13);
+    var NL = String.fromCharCode(10);
+    text = text.replace(new RegExp(CR+NL,"g"), NL).replace(new RegExp(CR,"g"), NL);
+    var lines = text.trim().split(NL).filter(function(l){ return l.trim().length > 0; });
+
+    if(lines.length < 2) { showToast("CSV appears empty — check the file","bad"); return null; }
+
+    // Parse header row — handle quoted headers, extra spaces, BOM chars
+    function parseCSVRow(row) {
+      var result = [];
+      var cur = "";
+      var inQuote = false;
+      for(var i=0; i<row.length; i++) {
+        var ch = row[i];
+        if(ch === '"') { inQuote = !inQuote; }
+        else if(ch === "," && !inQuote) { result.push(cur.trim()); cur = ""; }
+        else { cur += ch; }
+      }
+      result.push(cur.trim());
+      return result;
+    }
+
+    var headers = parseCSVRow(lines[0]).map(function(h){
+      // Strip BOM, quotes, whitespace, zero-width chars
+      return h.replace(/^﻿/,"").replace(/^["\s]+|["\s]+$/g,"").trim();
+    });
+
+    // Find name column — accept: Name, name, NAME, EMPLOYEE_NAME, Employee_Name
+    var nameIdx = -1;
+    var nameCandidates = ["name","employee_name","emp_name","full_name","employee name","worker_name"];
+    headers.forEach(function(h,i){
+      if(nameIdx < 0 && nameCandidates.indexOf(h.toLowerCase()) >= 0) nameIdx = i;
+    });
+
+    if(nameIdx < 0) {
+      // Show what headers were actually found to help diagnose
+      showToast("Name column not found. Headers found: " + headers.slice(0,5).join(", "), "bad");
+      console.error("All headers found:", headers);
+      return null;
+    }
+
     var records = {};
-    for(var i=1;i<lines.length;i++){
-      var cols = lines[i].split(",").map(function(c){ return c.trim().replace(/^"|"$/g,""); });
-      if(!cols[nameIdx]) continue;
-      var name = cols[nameIdx];
+    for(var i=1; i<lines.length; i++){
+      var cols = parseCSVRow(lines[i]);
+      var name = (cols[nameIdx]||"").trim();
+      if(!name) continue;
       var raw = {};
       headers.forEach(function(h,idx){
-        if(idx !== nameIdx) raw[h] = cols[idx]||"";
+        if(idx !== nameIdx && h) raw[h] = (cols[idx]||"").trim();
       });
-      records[name.replace(/ /g,"_").toLowerCase()] = { name:name, raw:raw };
+      records[name.toLowerCase().replace(/\s+/g," ")] = { name:name, raw:raw };
     }
+
+    if(Object.keys(records).length === 0) {
+      showToast("No data rows found in the CSV","bad");
+      return null;
+    }
+
     return records;
   }
 
