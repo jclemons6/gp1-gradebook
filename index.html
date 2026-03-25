@@ -219,6 +219,13 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
 .info-chip{display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:.73rem;color:var(--muted2);font-weight:600}
 .removed-row td{opacity:.4;text-decoration:line-through}
 .empty{color:var(--muted);font-size:.875rem;padding:2rem;text-align:center}
+/* Production bars */
+.prod-bar-wrap{display:flex;align-items:center;gap:.5rem;min-width:100px}
+.prod-bar-bg{flex:1;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+.prod-bar-fill{height:100%;border-radius:3px}
+.prod-val{font-size:.8rem;font-weight:600;min-width:36px;text-align:right}
+.prod-badge{display:inline-block;padding:2px 8px;border-radius:50px;font-size:.72rem;font-weight:700}
+.corr-high{color:#10b981}.corr-mid{color:#f59e0b}.corr-low{color:#ef4444}
 .toast{position:fixed;bottom:2rem;right:2rem;padding:.75rem 1.5rem;border-radius:10px;font-weight:600;font-size:.88rem;z-index:3000;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;max-width:320px}
 .toast.show{opacity:1;transform:translateY(0)}
 .toast.ok{background:var(--green);color:#fff}
@@ -345,6 +352,7 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
       <button class="tab" data-tab="assignments">📝 Assignments</button>
       <button class="tab" data-tab="averages">📊 Averages</button>
       <button class="tab" data-tab="classes">🏫 Classes</button>
+      <button class="tab" data-tab="production">⚡ Production</button>
     </div>
 
     <!-- ROSTER -->
@@ -386,6 +394,91 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
       <div class="avg-grid" id="avgGrid"></div>
       <div class="sec-title" style="margin:1.5rem 0 1rem">Class Comparison — All Cohorts</div>
       <div class="compare-wrap"><table class="compare-tbl"><thead><tr><th>Class</th><th>Students</th><th>Avg %</th><th>Pass Rate</th><th>Rank</th></tr></thead><tbody id="compareBody"></tbody></table></div>
+    </div>
+
+    <!-- PRODUCTION -->
+    <div id="pane-production" class="pane">
+      <div class="row-between">
+        <div>
+          <div style="font-size:.95rem;font-weight:600;margin-bottom:.25rem">⚡ Production vs. Classroom Performance</div>
+          <div style="color:var(--muted);font-size:.82rem">Snowflake data · Last updated: <span id="prodLastSync" style="color:var(--accent)">Never synced</span></div>
+        </div>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+          <button class="add-btn" id="uploadProdBtn" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)">📤 Upload CSV from Snowflake</button>
+          <button class="add-btn" id="clearProdBtn" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5">🗑 Clear</button>
+        </div>
+      </div>
+
+      <!-- Summary cards row -->
+      <div id="prodSummaryCards" style="display:none;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.9rem;margin-bottom:1.5rem"></div>
+
+      <!-- Setup instructions (shown when no data) -->
+      <div id="prodSetupGuide" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:2rem;margin-bottom:1.5rem">
+        <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:.75rem">How to load your Snowflake production data</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-bottom:1.5rem">
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:1.1rem">
+            <div style="font-weight:700;color:var(--accent);font-size:.8rem;letter-spacing:1px;margin-bottom:.5rem">STEP 1 — OPEN SNOWFLAKE</div>
+            <div style="color:var(--muted);font-size:.8rem;line-height:1.7">Log into your Snowflake account and open a new worksheet.</div>
+          </div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:1.1rem">
+            <div style="font-weight:700;color:var(--accent);font-size:.8rem;letter-spacing:1px;margin-bottom:.5rem">STEP 2 — RUN THE QUERY BELOW</div>
+            <div style="color:var(--muted);font-size:.8rem;line-height:1.7">Paste the query below. Update table/column names to match your Snowflake schema. Names must match your roster exactly.</div>
+          </div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:1.1rem">
+            <div style="font-weight:700;color:var(--accent);font-size:.8rem;letter-spacing:1px;margin-bottom:.5rem">STEP 3 — EXPORT AS CSV</div>
+            <div style="color:var(--muted);font-size:.8rem;line-height:1.7">Click the download button in Snowflake results and choose CSV. Save the file to your computer.</div>
+          </div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:1.1rem">
+            <div style="font-weight:700;color:var(--accent);font-size:.8rem;letter-spacing:1px;margin-bottom:.5rem">STEP 4 — UPLOAD HERE</div>
+            <div style="color:var(--muted);font-size:.8rem;line-height:1.7">Click "Upload CSV from Snowflake" above and select the file. Repeat daily for fresh data.</div>
+          </div>
+        </div>
+        <div style="font-weight:700;font-size:.82rem;color:var(--muted2);margin-bottom:.5rem;letter-spacing:1px">YOUR SNOWFLAKE QUERY — update table/column names to match your schema:</div>
+        <div style="font-family:monospace;font-size:.78rem;color:#7dd3fc;line-height:1.8;background:var(--navy);padding:1.25rem;border-radius:10px;overflow:auto;border:1px solid var(--border)">
+<span style="color:#a78bfa">SELECT</span><br>
+&nbsp;&nbsp;<span style="color:#fde68a">e.EMPLOYEE_NAME</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Name"</span>,<br>
+&nbsp;&nbsp;<span style="color:#fde68a">e.BRANCH_NUMBER</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Branch"</span>,<br><br>
+&nbsp;&nbsp;<span style="color:#94a3b8">-- Call metrics</span><br>
+&nbsp;&nbsp;<span style="color:#fde68a">p.TOTAL_CALLS_HANDLED</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Calls_Total"</span>,<br>
+&nbsp;&nbsp;<span style="color:#fde68a">ROUND(p.TOTAL_CALLS_HANDLED / NULLIF(p.DAYS_WORKED,0), 1)</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Calls_Per_Day"</span>,<br><br>
+&nbsp;&nbsp;<span style="color:#94a3b8">-- Applications</span><br>
+&nbsp;&nbsp;<span style="color:#fde68a">p.TOTAL_APPLICATIONS</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Apps_Total"</span>,<br>
+&nbsp;&nbsp;<span style="color:#fde68a">ROUND(p.TOTAL_APPLICATIONS / NULLIF(p.DAYS_WORKED,0), 1)</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Apps_Per_Day"</span>,<br><br>
+&nbsp;&nbsp;<span style="color:#94a3b8">-- Loans by product type</span><br>
+&nbsp;&nbsp;<span style="color:#fde68a">p.LOANS_TOTAL</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Loans_Total"</span>,<br>
+&nbsp;&nbsp;<span style="color:#fde68a">p.LOANS_AUTO</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Loans_Auto"</span>,<br>
+&nbsp;&nbsp;<span style="color:#fde68a">p.LOANS_PERSONAL</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Loans_Personal"</span>,<br>
+&nbsp;&nbsp;<span style="color:#fde68a">p.LOANS_MORTGAGE</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Loans_Mortgage"</span>,<br>
+&nbsp;&nbsp;<span style="color:#fde68a">p.LOANS_STUDENT</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Loans_Student"</span>,<br><br>
+&nbsp;&nbsp;<span style="color:#94a3b8">-- Insurance / CPL</span><br>
+&nbsp;&nbsp;<span style="color:#fde68a">p.INSURANCE_SALES</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Insurance_Sales"</span>,<br>
+&nbsp;&nbsp;<span style="color:#fde68a">p.CPL_SCORE</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"CPL"</span>,<br><br>
+&nbsp;&nbsp;<span style="color:#94a3b8">-- Revenue</span><br>
+&nbsp;&nbsp;<span style="color:#fde68a">p.TOTAL_REVENUE</span> <span style="color:#6ee7b7">AS</span> <span style="color:#fff">"Revenue_Total"</span><br><br>
+<span style="color:#a78bfa">FROM</span> <span style="color:#fde68a">EMPLOYEES e</span><br>
+<span style="color:#a78bfa">JOIN</span> <span style="color:#fde68a">PRODUCTION_METRICS p</span> <span style="color:#a78bfa">ON</span> e.EMPLOYEE_ID = p.EMPLOYEE_ID<br>
+<span style="color:#a78bfa">WHERE</span> p.REPORT_DATE &gt;= <span style="color:#f9a8d4">DATEADD</span>(day, -30, <span style="color:#f9a8d4">CURRENT_DATE</span>())<br>
+<span style="color:#a78bfa">AND</span> e.EMPLOYEE_NAME <span style="color:#a78bfa">IN</span> (<br>
+&nbsp;&nbsp;<span style="color:#94a3b8">-- Paste your class roster names here, one per line:</span><br>
+&nbsp;&nbsp;<span style="color:#fff">'Aaron Lozano','Alene Mckissick','Amber Gallegos','Amy Taylor',</span><br>
+&nbsp;&nbsp;<span style="color:#fff">'Ana Aguilar','Ana Garza','Arely Herrera','Ashley Thomas'</span><br>
+&nbsp;&nbsp;<span style="color:#94a3b8">-- ... add rest of roster</span><br>
+)<br>
+<span style="color:#a78bfa">ORDER BY</span> e.EMPLOYEE_NAME<span style="color:#fff">;</span>
+        </div>
+        <div style="color:var(--muted);font-size:.78rem;margin-top:.75rem">💡 Tip: Replace table names (EMPLOYEES, PRODUCTION_METRICS) and column names with your actual Snowflake schema. The column aliases in quotes become the headers in the portal.</div>
+        <input type="file" id="prodFileInput" accept=".csv,.json" style="display:none" />
+      </div>
+
+      <!-- Production data table (shown when data exists) -->
+      <div id="prodTableWrap" style="display:none">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:auto">
+          <table class="rtbl" id="prodTable">
+            <thead id="prodHead"></thead>
+            <tbody id="prodBody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- CLASSES -->
@@ -966,6 +1059,7 @@ _loadScript("https://unpkg.com/firebase@10.8.0/firebase-app-compat.js", function
     renderAssignments();
     renderAverages();
     renderClasses();
+    renderProduction();
     el("rosterInfo").textContent=active.length+' active · '+getStudents().filter(function(s){ return s.removed; }).length+' removed';
   }
 
@@ -1515,6 +1609,212 @@ _loadScript("https://unpkg.com/firebase@10.8.0/firebase-app-compat.js", function
     openStuDetailModal:openStuDetail
   };
 
+  // ===================== PRODUCTION =====================
+  // Production data structure per student:
+  // { name, calls, aht, quality, sales, raw:{} }
+
+  function getProdData() {
+    var cl = cls();
+    return (cl && cl.production) ? cl.production : {};
+  }
+
+  // Metric groups for display
+  var PROD_GROUPS = [
+    { label:"Calls", keys:["Calls_Total","Calls_Per_Day"], icon:"📞" },
+    { label:"Applications", keys:["Apps_Total","Apps_Per_Day"], icon:"📋" },
+    { label:"Loans", keys:["Loans_Total","Loans_Auto","Loans_Personal","Loans_Mortgage","Loans_Student"], icon:"🏦" },
+    { label:"Insurance / CPL", keys:["Insurance_Sales","CPL"], icon:"🛡️" },
+    { label:"Revenue", keys:["Revenue_Total"], icon:"💰" },
+  ];
+
+  function fmtVal(k, v) {
+    if(v === null || v === undefined || v === "" || v === "—") return "—";
+    var n = parseFloat(v);
+    if(isNaN(n)) return v;
+    if(k === "Revenue_Total") return "$"+n.toLocaleString(undefined,{maximumFractionDigits:0});
+    if(k === "CPL") return "$"+n.toFixed(2);
+    if(k.indexOf("Per_Day") >= 0) return n.toFixed(1);
+    return n.toLocaleString(undefined,{maximumFractionDigits:0});
+  }
+
+  function renderProduction() {
+    var prod = getProdData();
+    var students = getStudents().filter(function(s){ return !s.removed; });
+    var assigns = getAssigns();
+    var hasProd = Object.keys(prod).length > 0;
+    var cl = cls();
+
+    el("prodSetupGuide").style.display = hasProd ? "none" : "block";
+    el("prodTableWrap").style.display = hasProd ? "block" : "none";
+    el("prodSummaryCards").style.display = hasProd ? "grid" : "none";
+    el("prodLastSync").textContent = (cl && cl.prodLastSync) ? cl.prodLastSync : "Never synced";
+
+    if (!hasProd) return;
+
+    // Detect which columns are actually present in the data
+    var availableKeys = [];
+    Object.values(prod).forEach(function(p) {
+      if(p.raw) Object.keys(p.raw).forEach(function(k){
+        if(availableKeys.indexOf(k) < 0 && k !== "Branch") availableKeys.push(k);
+      });
+    });
+
+    // Build max values for bar scaling
+    var maxes = {};
+    availableKeys.forEach(function(k){
+      var vals = Object.values(prod).map(function(p){ return parseFloat((p.raw&&p.raw[k])||0)||0; });
+      maxes[k] = Math.max.apply(null, vals) || 1;
+    });
+
+    // Summary cards — class averages per metric group
+    el("prodSummaryCards").innerHTML = PROD_GROUPS.map(function(g){
+      var groupKeys = g.keys.filter(function(k){ return availableKeys.indexOf(k)>=0; });
+      if(!groupKeys.length) return "";
+      var matched = Object.values(prod).filter(function(p){ return p.raw; });
+      var avgLine = groupKeys.map(function(k){
+        var avg = matched.length ? matched.reduce(function(s,p){ return s+(parseFloat((p.raw&&p.raw[k])||0)||0); },0)/matched.length : 0;
+        return '<div style="font-size:.75rem;color:var(--muted2)">'+k.replace(/_/g," ")+': <strong style="color:var(--text)">'+fmtVal(k,avg)+'</strong></div>';
+      }).join("");
+      return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem">'+
+        '<div style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem">'+g.icon+' '+g.label+'</div>'+
+        avgLine+'</div>';
+    }).join("");
+
+    // Build visible group columns for table
+    var visGroups = PROD_GROUPS.filter(function(g){
+      return g.keys.some(function(k){ return availableKeys.indexOf(k)>=0; });
+    });
+
+    // Header
+    el("prodHead").innerHTML = "<tr>" +
+      "<th style='position:sticky;left:0;background:var(--surface2);z-index:10'>Name</th>" +
+      "<th>Class %</th>" +
+      visGroups.map(function(g){
+        var gkeys = g.keys.filter(function(k){ return availableKeys.indexOf(k)>=0; });
+        return gkeys.map(function(k){
+          return "<th>"+g.icon+" "+k.replace(/_/g,"<br>")+"</th>";
+        }).join("");
+      }).join("") +
+      "<th>Insight</th>" +
+      "</tr>";
+
+    // Sort by class pct descending
+    var sorted = students.slice().sort(function(a,b){
+      return getPct(b,assigns)-getPct(a,assigns);
+    });
+
+    el("prodBody").innerHTML = sorted.map(function(stu){
+      var total = getTotal(stu,assigns);
+      var mx = getMax(assigns);
+      var pct = mx ? total/mx : 0;
+      var pColor = pct>=0.80?"#10b981":pct>=0.60?"#38bdf8":"#ef4444";
+
+      // Match by name case-insensitive
+      var stuKey = stu.name.trim().toLowerCase();
+      var prodMatch = null;
+      Object.values(prod).forEach(function(p){
+        if(p.name && p.name.trim().toLowerCase()===stuKey) prodMatch=p;
+      });
+
+      var metricCells = visGroups.map(function(g){
+        var gkeys = g.keys.filter(function(k){ return availableKeys.indexOf(k)>=0; });
+        return gkeys.map(function(k){
+          if(!prodMatch||!prodMatch.raw||prodMatch.raw[k]===undefined||prodMatch.raw[k]==="")
+            return '<td style="color:var(--muted);text-align:center">—</td>';
+          var raw = parseFloat(prodMatch.raw[k])||0;
+          var ratio = maxes[k]?raw/maxes[k]:0;
+          var c = ratio>=0.75?"#10b981":ratio>=0.50?"#38bdf8":ratio>=0.25?"#f59e0b":"#ef4444";
+          return '<td><div class="prod-bar-wrap">'+
+            '<div class="prod-bar-bg"><div class="prod-bar-fill" style="width:'+Math.round(ratio*100)+'%;background:'+c+'"></div></div>'+
+            '<span class="prod-val" style="color:'+c+'">'+fmtVal(k,raw)+'</span>'+
+            '</div></td>';
+        }).join("");
+      }).join("");
+
+      // Insight label
+      var insightHtml = '<span style="color:var(--muted);font-size:.8rem">No data</span>';
+      if(prodMatch && prodMatch.raw) {
+        var numericKeys = availableKeys.filter(function(k){
+          return parseFloat((prodMatch.raw&&prodMatch.raw[k])||"")||0 > 0;
+        });
+        if(numericKeys.length > 0) {
+          var prodAvg = numericKeys.reduce(function(s,k){
+            return s + (parseFloat((prodMatch.raw&&prodMatch.raw[k])||0)||0)/(maxes[k]||1);
+          },0) / numericKeys.length;
+          var diff = pct - prodAvg;
+          if(Math.abs(diff) < 0.12)
+            insightHtml = '<span class="prod-badge" style="background:rgba(16,185,129,.15);color:#10b981">✓ Well Rounded</span>';
+          else if(diff > 0.20)
+            insightHtml = '<span class="prod-badge" style="background:rgba(56,189,248,.15);color:#38bdf8">📚 Class Strength</span>';
+          else if(diff < -0.20)
+            insightHtml = '<span class="prod-badge" style="background:rgba(167,139,250,.15);color:#a78bfa">⚡ Floor Strength</span>';
+          else if(diff > 0)
+            insightHtml = '<span class="prod-badge" style="background:rgba(245,158,11,.15);color:#f59e0b">↑ Class Edge</span>';
+          else
+            insightHtml = '<span class="prod-badge" style="background:rgba(245,158,11,.15);color:#f59e0b">↑ Prod Edge</span>';
+        }
+      }
+
+      return "<tr>" +
+        '<td style="position:sticky;left:0;background:var(--surface);font-weight:600;z-index:5">'+stu.name+'</td>' +
+        '<td><span class="pct-pill" style="background:'+pColor+'22;color:'+pColor+';border:1px solid '+pColor+'44">'+Math.round(pct*100)+'%</span></td>' +
+        metricCells +
+        '<td>'+insightHtml+'</td>' +
+        "</tr>";
+    }).join("") || '<tr><td colspan="20" class="empty">No students</td></tr>';
+  }
+
+  function parseProdCSV(text) {
+    var NL2=String.fromCharCode(10); var lines=text.trim().split(NL2).map(function(l){return l.trim();});
+    if(lines.length < 2) return null;
+    var headers = lines[0].split(",").map(function(h){ return h.trim().replace(/^"|"$/g,""); });
+    var nameIdx = headers.findIndex(function(h){ return h.toLowerCase()==="name"; });
+    if(nameIdx < 0) { showToast("CSV must have a 'Name' column","bad"); return null; }
+    var records = {};
+    for(var i=1;i<lines.length;i++){
+      var cols = lines[i].split(",").map(function(c){ return c.trim().replace(/^"|"$/g,""); });
+      if(!cols[nameIdx]) continue;
+      var name = cols[nameIdx];
+      var raw = {};
+      headers.forEach(function(h,idx){
+        if(idx !== nameIdx) raw[h] = cols[idx]||"";
+      });
+      records[name.replace(/ /g,"_").toLowerCase()] = { name:name, raw:raw };
+    }
+    return records;
+  }
+
+  function uploadProductionData(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var text = e.target.result;
+      var prod = null;
+      if(file.name.endsWith(".json")) {
+        try { prod = JSON.parse(text); } catch(err) { showToast("Invalid JSON file","bad"); return; }
+      } else {
+        prod = parseProdCSV(text);
+      }
+      if(!prod) return;
+      var cl = cls();
+      cl.production = prod;
+      cl.prodLastSync = new Date().toLocaleString();
+      scheduleSave();
+      renderProduction();
+      showToast("Production data loaded — "+Object.keys(prod).length+" records","ok");
+    };
+    reader.readAsText(file);
+  }
+
+  function clearProductionData() {
+    if(!confirm("Clear all production data for this class?")) return;
+    var cl = cls();
+    cl.production = {};
+    cl.prodLastSync = null;
+    scheduleSave();
+    renderProduction();
+    showToast("Production data cleared","ok");
+  }
+
   // ===================== EXPORT FUNCTIONS =====================
   function exportClassCSV(cl) {
     var assigns = objToArr(cl.assignments).filter(function(a){ return a.active !== false; });
@@ -1671,6 +1971,12 @@ _loadScript("https://unpkg.com/firebase@10.8.0/firebase-app-compat.js", function
   wire("ecDeleteBtn", deleteClass);
   wire("chgPwBtn", function(){ el("pwErr").style.display="none"; openModal("chgPwModal"); });
   wire("exportBtn", function(){ openModal("exportModal"); });
+  wire("uploadProdBtn", function(){ el("prodFileInput").click(); });
+  wire("clearProdBtn", clearProductionData);
+  el("prodFileInput").addEventListener("change", function(e){
+    var file = e.target.files[0];
+    if(file) { uploadProductionData(file); e.target.value=""; }
+  });
   wire("exportCSVBtn", function(){ exportClassCSV(cls()); });
   wire("exportAllCSVBtn", exportAllCSV);
   wire("exportJSONBtn", exportJSON);
