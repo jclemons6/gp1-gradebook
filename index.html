@@ -225,6 +225,20 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
 .prod-bar-fill{height:100%;border-radius:3px}
 .prod-val{font-size:.8rem;font-weight:600;min-width:36px;text-align:right}
 .prod-badge{display:inline-block;padding:2px 8px;border-radius:50px;font-size:.72rem;font-weight:700}
+/* Production cards */
+.prod-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1rem;margin-bottom:1rem}
+.prod-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.25rem;transition:border-color .2s}
+.prod-card:hover{border-color:var(--border2)}
+.prod-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.prod-card-name{font-weight:700;font-size:.95rem}
+.prod-card-score{font-size:.78rem;color:var(--muted)}
+.prod-metric-row{display:flex;align-items:center;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid var(--border)}
+.prod-metric-row:last-child{border-bottom:none}
+.prod-metric-label{font-size:.78rem;color:var(--muted2);flex:1}
+.prod-metric-val{font-size:.85rem;font-weight:700;text-align:right;min-width:60px}
+.prod-metric-median{font-size:.72rem;color:var(--muted);text-align:right;min-width:70px}
+.prod-metric-bar{width:80px;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin:0 .5rem}
+.prod-metric-bar-fill{height:100%;border-radius:3px}
 .corr-high{color:#10b981}.corr-mid{color:#f59e0b}.corr-low{color:#ef4444}
 .toast{position:fixed;bottom:2rem;right:2rem;padding:.75rem 1.5rem;border-radius:10px;font-weight:600;font-size:.88rem;z-index:3000;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;max-width:320px}
 .toast.show{opacity:1;transform:translateY(0)}
@@ -403,8 +417,8 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
           <div style="font-size:.95rem;font-weight:600;margin-bottom:.25rem">⚡ Production vs. Classroom Performance</div>
           <div style="color:var(--muted);font-size:.82rem">Snowflake data · Last updated: <span id="prodLastSync" style="color:var(--accent)">Never synced</span></div>
         </div>
-        <div style="display:flex;gap:.75rem;flex-wrap:wrap">
-          <button class="add-btn" id="uploadProdBtn" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)">📤 Upload CSV from Snowflake</button>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center">
+          <button class="add-btn" id="uploadProdBtn" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)">📤 Upload CSV</button>
           <button class="add-btn" id="clearProdBtn" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5">🗑 Clear</button>
         </div>
       </div>
@@ -486,7 +500,7 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
         <input type="file" id="prodFileInput" accept=".csv,.json" style="display:none" />
       </div>
 
-      <!-- Production data table (shown when data exists) -->
+      <!-- Production table view -->
       <div id="prodTableWrap" style="display:none">
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:auto">
           <table class="rtbl" id="prodTable">
@@ -697,46 +711,31 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
 <div class="toast" id="toast"></div>
 
 <!-- FIREBASE -->
-<!-- Firebase SDK via unpkg CDN -->
+<!-- Firebase SDK — v9.6.10 compat (stable gstatic CDN) -->
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 <script>
 window._fbdb = null;
 window._firebaseReady = false;
-
-function _loadScript(url, cb) {
-  var s = document.createElement("script");
-  s.src = url;
-  s.onload = cb;
-  s.onerror = function() {
-    console.warn("Failed to load:", url);
-    window._firebaseReady = false;
-    // App starts anyway via seedDefault
-  };
-  document.head.appendChild(s);
+try {
+  if (!firebase.apps.length) {
+    firebase.initializeApp({
+      apiKey:"AIzaSyALx4avYOancxV5O96Ps5FM-6b8IGPhXK8",
+      authDomain:"gp1-gradebook.firebaseapp.com",
+      databaseURL:"https://gp1-gradebook-default-rtdb.firebaseio.com",
+      projectId:"gp1-gradebook",
+      storageBucket:"gp1-gradebook.firebasestorage.app",
+      messagingSenderId:"984231332046",
+      appId:"1:984231332046:web:b5b5d9fbae86f85427689f"
+    });
+  }
+  window._fbdb = firebase.database();
+  window._firebaseReady = true;
+  console.log("Firebase ready on gstatic 9.6.10");
+} catch(e) {
+  console.warn("Firebase init failed:", e);
+  window._firebaseReady = false;
 }
-
-_loadScript("https://unpkg.com/firebase@10.8.0/firebase-app-compat.js", function() {
-  _loadScript("https://unpkg.com/firebase@10.8.0/firebase-database-compat.js", function() {
-    try {
-      if (!firebase.apps.length) {
-        firebase.initializeApp({
-          apiKey:"AIzaSyALx4avYOancxV5O96Ps5FM-6b8IGPhXK8",
-          authDomain:"gp1-gradebook.firebaseapp.com",
-          databaseURL:"https://gp1-gradebook-default-rtdb.firebaseio.com",
-          projectId:"gp1-gradebook",
-          storageBucket:"gp1-gradebook.firebasestorage.app",
-          messagingSenderId:"984231332046",
-          appId:"1:984231332046:web:b5b5d9fbae86f85427689f"
-        });
-      }
-      window._fbdb = firebase.database();
-      window._firebaseReady = true;
-      console.log("Firebase ready");
-    } catch(e) {
-      console.warn("Firebase init failed:", e);
-      window._firebaseReady = false;
-    }
-  });
-});
 </script>
 
 <!-- Main app -->
@@ -1620,6 +1619,14 @@ _loadScript("https://unpkg.com/firebase@10.8.0/firebase-app-compat.js", function
     openEditStudent:openEditStudent, openStuDetail:openStuDetail,
     openEditAssign:openEditAssign, openMassGrade:openMassGrade, toggleAssignActive:toggleAssignActive,
     openEditClass:openEditClass,
+    filterProdTier:function(tierKey){
+      _prodFilterTier = _prodFilterTier===tierKey ? null : tierKey;
+      renderProduction();
+    },
+    clearProdFilter:function(){
+      _prodFilterTier=null;
+      renderProduction();
+    },
     sortProd:function(key){
       if(_prodSortKey===key) _prodSortDir*=-1;
       else { _prodSortKey=key; _prodSortDir=-1; }
@@ -1687,28 +1694,28 @@ _loadScript("https://unpkg.com/firebase@10.8.0/firebase-app-compat.js", function
   // Metric groups for display
   var PROD_GROUPS = [
     { label:"Applications", icon:"📋", keys:[
-      {k:"Apps",                    label:"Apps",           tip:"Total applications taken"},
-      {k:"Apps_vs_Median_Pct",      label:"vs Median %",    fmt:"pct",   tip:"Apps vs company median %", medianRef:"Company_Median_Apps"},
-      {k:"Apps_Funded",             label:"Funded",         tip:"Apps funded"},
-      {k:"Company_Median_Apps",     label:"Median Apps",    tip:"Company median apps",  median:true}
+      {k:"Apps",                    label:"Apps",              tip:"Total applications taken"},
+      {k:"Apps_vs_Median_Pct",      label:"vs Median %",       fmt:"pct", tip:"Apps vs company median", medianRef:"Company_Median_Apps"},
+      {k:"Apps_Funded",             label:"Funded",            tip:"Apps funded"},
+      {k:"Company_Median_Apps",     label:"Median",            tip:"Company median apps", median:true}
     ]},
     { label:"Loans", icon:"🏦", keys:[
-      {k:"Loans",                   label:"Loans",          tip:"Total loans"},
-      {k:"Loans_vs_Median_Pct",     label:"vs Median %",    fmt:"pct",   tip:"Loans vs company median %", medianRef:"Company_Median_Loans"},
-      {k:"Loans_Small",             label:"Small",          tip:"Small loans"},
-      {k:"Loans_Large",             label:"Large",          tip:"Large loans"},
-      {k:"Loans_Auto",              label:"Auto",           tip:"Auto loans"},
-      {k:"Company_Median_Loans",    label:"Median Loans",   tip:"Company median loans", median:true}
+      {k:"Loans",                   label:"Loans",             tip:"Total loans"},
+      {k:"Loans_vs_Median_Pct",     label:"vs Median %",       fmt:"pct", tip:"Loans vs company median", medianRef:"Company_Median_Loans"},
+      {k:"Loans_Small",             label:"Small",             tip:"Small loans"},
+      {k:"Loans_Large",             label:"Large",             tip:"Large loans"},
+      {k:"Loans_Auto",              label:"Auto",              tip:"Auto loans"},
+      {k:"Company_Median_Loans",    label:"Median",            tip:"Company median loans", median:true}
     ]},
     { label:"Volume", icon:"💵", keys:[
-      {k:"Volume_Financed",         label:"Vol Financed",   fmt:"dollar", tip:"Total volume financed"},
-      {k:"Volume_vs_Median_Pct",    label:"vs Median %",    fmt:"pct",    tip:"Volume vs company median %", medianRef:"Company_Median_Volume"},
-      {k:"Auto_Volume",             label:"Auto Vol",       fmt:"dollar", tip:"Auto loan volume"},
-      {k:"Company_Median_Volume",   label:"Median Vol",     fmt:"dollar", tip:"Company median volume", median:true}
+      {k:"Volume_Financed",         label:"Vol Financed",      fmt:"dollar", tip:"Total volume financed"},
+      {k:"Volume_vs_Median_Pct",    label:"vs Median %",       fmt:"pct",    tip:"Volume vs company median", medianRef:"Company_Median_Volume"},
+      {k:"Auto_Volume",             label:"Auto Vol",          fmt:"dollar", tip:"Auto loan volume"},
+      {k:"Company_Median_Volume",   label:"Median",            fmt:"dollar", tip:"Company median volume", median:true}
     ]},
-    { label:"Insurance", icon:"🛡️", keys:[
-      {k:"Insurance_Premium",       label:"Premium $",      fmt:"dollar", tip:"Insurance premium total"},
-      {k:"Company_Median_Insurance",label:"Median Ins",     fmt:"dollar", tip:"Company median insurance", median:true}
+    { label:"CPL", icon:"🛡️", keys:[
+      {k:"CPL",                     label:"CPL",               fmt:"decimal2", tip:"Coverage per loan"},
+      {k:"Company_Median_CPL",      label:"Median CPL",        fmt:"decimal2", tip:"Company median CPL", median:true}
     ]}
   ];
 
@@ -1718,26 +1725,41 @@ _loadScript("https://unpkg.com/firebase@10.8.0/firebase-app-compat.js", function
   var _prodSortKey = "vs_Company_rank";
   var _prodSortDir = 1;
 
+
   function fmtVal(fmt, v) {
     if(v===null||v===undefined||v===""||v==="—") return "—";
     var n=parseFloat(v); if(isNaN(n)) return String(v);
-    if(fmt==="dollar") return "$"+n.toLocaleString(undefined,{maximumFractionDigits:0});
-    if(fmt==="pct")    return n.toFixed(1)+"%";
+    if(fmt==="dollar")   return "$"+n.toLocaleString(undefined,{maximumFractionDigits:0});
+    if(fmt==="decimal2") return n.toFixed(2);
+    if(fmt==="pct")      return n.toFixed(1)+"%";
     return n.toLocaleString(undefined,{maximumFractionDigits:0});
   }
   function fmtMetric(m,v){ return fmtVal(m?m.fmt:null,v); }
 
-  // vs_Company tier config
   var VS_TIERS = [
-    { key:"NO ACTIVITY", rank:0, label:"No Activity",      color:"#6b7280", bg:"rgba(107,114,128,.15)", min:0,   max:0   },
-    { key:"BELOW MEDIAN",   rank:1, label:"Below Median (<70%)",   color:"#ef4444", bg:"rgba(239,68,68,.15)",    min:0,   max:69  },
-    { key:"SLIGHTLY BELOW", rank:2, label:"Slightly Below (70-89%)",color:"#f97316",bg:"rgba(249,115,22,.15)",   min:70,  max:89  },
-    { key:"AT MEDIAN",      rank:3, label:"At Median (90-119%)",    color:"#f59e0b", bg:"rgba(245,158,11,.15)",  min:90,  max:119 },
-    { key:"ABOVE MEDIAN",   rank:4, label:"Above Median (120%+)",   color:"#10b981", bg:"rgba(16,185,129,.15)", min:120, max:9999}
+    { key:"NO ACTIVITY",    rank:0, label:"No Activity",            short:"No Activity",  color:"#6b7280", bg:"rgba(107,114,128,.15)" },
+    { key:"BELOW MEDIAN",   rank:1, label:"Below Median (<70%)",    short:"Below",        color:"#ef4444", bg:"rgba(239,68,68,.15)"   },
+    { key:"SLIGHTLY BELOW", rank:2, label:"Slightly Below (70-89%)", short:"Slightly Below",color:"#f97316",bg:"rgba(249,115,22,.15)" },
+    { key:"AT MEDIAN",      rank:3, label:"At Median (90-119%)",    short:"At Median",    color:"#f59e0b", bg:"rgba(245,158,11,.15)"  },
+    { key:"ABOVE MEDIAN",   rank:4, label:"Above Median (120%+)",   short:"Above",        color:"#10b981", bg:"rgba(16,185,129,.15)"  }
   ];
+  function getTier(vsKey){ return VS_TIERS.find(function(t){return t.key===vsKey;})||VS_TIERS[0]; }
 
-  function getTier(vsKey) {
-    return VS_TIERS.find(function(t){ return t.key===vsKey; }) || VS_TIERS[0];
+  var _prodFilterTier = null; // null = show all, else tier key string
+
+  function findProdMatch(stu, prod){
+    var key=stu.name.trim().toLowerCase().replace(/ +/g," ");
+    return Object.values(prod).find(function(p){
+      if(!p.name) return false;
+      var pk=p.name.trim().toLowerCase().replace(/ +/g," ");
+      if(pk===key) return true;
+      var sp=key.split(" "),pp=pk.split(" ");
+      if(sp.length>=2&&pp.length>=2){
+        if(pp.slice(1).join(" ")+" "+pp[0]===key) return true;
+        if(sp.slice(1).join(" ")+" "+sp[0]===pk) return true;
+      }
+      return false;
+    })||null;
   }
 
   function renderProduction() {
@@ -1746,31 +1768,17 @@ _loadScript("https://unpkg.com/firebase@10.8.0/firebase-app-compat.js", function
     var assigns=getAssigns();
     var hasProd=Object.keys(prod).length>0;
     var cl=cls();
+
     el("prodSetupGuide").style.display=hasProd?"none":"block";
+    el("prodBanner").style.display=hasProd?"block":"none";
     el("prodTableWrap").style.display=hasProd?"block":"none";
-    el("prodSummaryCards").style.display=hasProd?"grid":"none";
+    el("prodSummaryCards").style.display="none";
     el("prodLastSync").textContent=(cl&&cl.prodLastSync)?cl.prodLastSync:"Never synced";
     if(!hasProd) return;
 
-    // Match student to prod record
-    function findProd(stu){
-      var key=stu.name.trim().toLowerCase().replace(/ +/g," ");
-      return Object.values(prod).find(function(p){
-        if(!p.name) return false;
-        var pk=p.name.trim().toLowerCase().replace(/ +/g," ");
-        if(pk===key) return true;
-        var sp=key.split(" "),pp=pk.split(" ");
-        if(sp.length>=2&&pp.length>=2){
-          if(pp.slice(1).join(" ")+" "+pp[0]===key) return true;
-          if(sp.slice(1).join(" ")+" "+sp[0]===pk) return true;
-        }
-        return false;
-      })||null;
-    }
-
     // Build row data
     var rows=students.map(function(stu){
-      var pm=findProd(stu);
+      var pm=findProdMatch(stu,prod);
       var total=getTotal(stu,assigns);
       var mx=getMax(assigns);
       var pct=mx?total/mx:0;
@@ -1779,132 +1787,171 @@ _loadScript("https://unpkg.com/firebase@10.8.0/firebase-app-compat.js", function
       return {stu:stu,pm:pm,total:total,pct:pct,tier:tier,vsKey:vsKey};
     });
 
-    // ── SUMMARY BANNER ──────────────────────────────────────────────────────
-    // Count by tier
+    // ── CLICKABLE SUMMARY BANNER ───────────────────────────────────────────
     var tierCounts={};
-    VS_TIERS.forEach(function(t){ tierCounts[t.key]=[]; });
+    VS_TIERS.forEach(function(t){tierCounts[t.key]=[];});
     rows.forEach(function(r){
-      if(r.pm&&tierCounts[r.vsKey]!==undefined) tierCounts[r.vsKey].push(r.stu.name.split(" ")[0]);
+      if(r.pm&&tierCounts[r.vsKey]!==undefined)
+        tierCounts[r.vsKey].push(r.stu.name.split(" ")[0]);
     });
     var withData=rows.filter(function(r){return r.pm&&r.vsKey;});
 
-    var bannerHtml='<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1.25rem">' +
-      '<div style="font-weight:700;font-size:1rem;margin-bottom:1rem">📊 Class vs Company Median — '+withData.length+' of '+students.length+' students matched</div>' +
-      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.75rem">' +
+    var filterHint=_prodFilterTier
+      ?'<div style="display:inline-flex;align-items:center;gap:.5rem;margin-top:.75rem;font-size:.8rem;color:var(--muted)">Showing: <strong style="color:var(--text)">'+getTier(_prodFilterTier).label+'</strong> <button id="clearProdFilterBtn" style="background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.3);color:var(--accent);border-radius:6px;padding:2px 8px;font-size:.75rem;cursor:pointer;font-family:DM Sans,sans-serif">✕ Show All</button></div>'
+      :'<div style="font-size:.75rem;color:var(--muted);margin-top:.75rem">Click a tile to filter the table below</div>';
+
+    el("prodBanner").innerHTML='<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1.25rem">'+
+      '<div style="font-weight:700;font-size:1rem;margin-bottom:.85rem">📊 Class vs Company Median — '+withData.length+' of '+students.length+' students</div>'+
+      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:.6rem">'+
       VS_TIERS.slice().reverse().map(function(t){
         var names=tierCounts[t.key]||[];
-        if(!names.length&&t.key!=="ABOVE MEDIAN") return "";
-        return '<div style="background:'+t.bg+';border:1px solid '+t.color+'44;border-radius:10px;padding:.85rem">'+
-          '<div style="font-weight:700;color:'+t.color+';font-size:.82rem;margin-bottom:.3rem">'+t.label+'</div>'+
-          '<div style="font-size:1.4rem;font-weight:800;font-family:sans-serif;color:'+t.color+'">'+names.length+'</div>'+
-          (names.length&&t.key!=="ABOVE MEDIAN"?'<div style="font-size:.72rem;color:var(--muted2);margin-top:.25rem">'+names.join(", ")+'</div>':'')+
-          (t.key==="ABOVE MEDIAN"&&names.length?'<div style="font-size:.75rem;color:var(--muted2);margin-top:.25rem">Most of your class is outperforming the typical team member</div>':'')+
+        if(!names.length) return "";
+        var isActive=_prodFilterTier===t.key;
+        return '<div data-tierfilter="'+t.key+'" style="background:'+t.bg+';border:2px solid '+(isActive?t.color:t.color+'44')+';border-radius:10px;padding:.85rem;cursor:pointer;transition:all .15s;'+(isActive?'box-shadow:0 0 0 3px '+t.color+'33':'')+'" '+
+          'data-tierclick="1">'+
+          '<div style="font-weight:700;color:'+t.color+';font-size:.78rem;margin-bottom:.2rem">'+t.label+'</div>'+
+          '<div style="font-size:1.8rem;font-weight:800;color:'+t.color+';line-height:1">'+names.length+'</div>'+
+          (t.key!=="ABOVE MEDIAN"?'<div style="font-size:.7rem;color:var(--muted2);margin-top:.2rem">'+names.join(", ")+'</div>':
+           '<div style="font-size:.7rem;color:var(--muted2);margin-top:.2rem">Outperforming company median</div>')+
           '</div>';
       }).join("")+
-      '</div></div>';
+      '</div>'+filterHint+
+      '</div>';
 
-    // ── METRIC SUMMARY CARDS ────────────────────────────────────────────────
-    // Find which keys are present
-    var presentKeys={};
-    PROD_METRICS.forEach(function(m){
-      presentKeys[m.k]=Object.values(prod).some(function(p){
-        return p.raw&&p.raw[m.k]!==undefined&&p.raw[m.k]!=="";
-      });
-    });
-
-    el("prodSummaryCards").innerHTML="";
-    el("prodBanner").innerHTML=bannerHtml;
-
+    // ── FILTERED TABLE ─────────────────────────────────────────────────────
     // Sort rows
-    if(_prodSortKey==="class_pct"){
-      rows.sort(function(a,b){return _prodSortDir*(b.pct-a.pct);});
-    } else if(_prodSortKey==="vs_Company_rank"){
-      rows.sort(function(a,b){
-        var diff=_prodSortDir*(b.tier.rank-a.tier.rank);
-        if(diff!==0) return diff;
-        return b.pct-a.pct;
-      });
-    } else if(_prodSortKey){
-      rows.sort(function(a,b){
-        var av=parseFloat((a.pm&&a.pm.raw&&a.pm.raw[_prodSortKey])||0)||0;
-        var bv=parseFloat((b.pm&&b.pm.raw&&b.pm.raw[_prodSortKey])||0)||0;
-        return _prodSortDir*(bv-av);
-      });
-    }
-
-    // Visible metric cols (skip median reference cols in table to keep compact)
-    var visMetrics=PROD_METRICS.filter(function(m){
-      return presentKeys[m.k]&&!m.median;
+    rows.sort(function(a,b){
+      if(_prodSortKey==="class_pct") return _prodSortDir*(b.pct-a.pct);
+      if(_prodSortKey==="vs_Company_rank"){
+        var d=_prodSortDir*(b.tier.rank-a.tier.rank);
+        return d!==0?d:b.pct-a.pct;
+      }
+      var av=parseFloat((a.pm&&a.pm.raw&&a.pm.raw[_prodSortKey])||0)||0;
+      var bv=parseFloat((b.pm&&b.pm.raw&&b.pm.raw[_prodSortKey])||0)||0;
+      return _prodSortDir*(bv-av);
     });
 
-    // Max per key
+    // Apply tier filter
+    var filtered=_prodFilterTier
+      ?rows.filter(function(r){return r.vsKey===_prodFilterTier;})
+      :rows;
+
+    // Column definitions — exactly matching CSV
+    var COLS = [
+      {k:"Apps",              label:"Apps",        medianK:"Company_Median_Apps",   fmt:null,       grp:"📋"},
+      {k:"Apps_vs_Median_Pct",label:"Apps %",      fmt:"pct",                                       grp:"📋"},
+      {k:"Apps_Funded",       label:"Funded",      medianK:"Company_Median_Funded", fmt:null,       grp:"📋"},
+      {k:"Loans",             label:"Loans",       medianK:"Company_Median_Loans",  fmt:null,       grp:"🏦"},
+      {k:"Loans_vs_Median_Pct",label:"Loans %",    fmt:"pct",                                       grp:"🏦"},
+      {k:"Loans_Small",       label:"Small",       fmt:null,                                        grp:"🏦"},
+      {k:"Loans_Large",       label:"Large",       fmt:null,                                        grp:"🏦"},
+      {k:"Loans_Auto",        label:"Auto",        medianK:"Company_Median_Auto",   fmt:null,       grp:"🏦"},
+      {k:"Volume_Financed",   label:"Vol $",       medianK:"Company_Median_Volume", fmt:"dollar",   grp:"💵"},
+      {k:"Volume_vs_Median_Pct",label:"Vol %",     fmt:"pct",                                       grp:"💵"},
+      {k:"Auto_Volume",       label:"Auto Vol $",  fmt:"dollar",                                    grp:"💵"},
+      {k:"CPL",               label:"CPL",         medianK:"Company_Median_CPL",    fmt:"decimal2", grp:"🛡️"},
+    ];
+
+    // Compute maxes for bar scaling
     var maxes={};
-    visMetrics.forEach(function(m){
-      maxes[m.k]=Math.max.apply(null,[1].concat(Object.values(prod).map(function(p){
-        return parseFloat((p.raw&&p.raw[m.k])||0)||0;
+    COLS.forEach(function(c){
+      maxes[c.k]=Math.max.apply(null,[1].concat(Object.values(prod).map(function(p){
+        return parseFloat((p.raw&&p.raw[c.k])||0)||0;
       })));
     });
 
-    // Sortable TH
-    function sortTh(key,label,tip){
+    function sortTh(key,label,extra){
       var active=_prodSortKey===key;
       var arrow=active?(_prodSortDir<0?" ▼":" ▲"):" ⇅";
-      return '<th style="cursor:pointer;white-space:nowrap;user-select:none" title="'+(tip||label)+'" data-sortkey="'+key+'" data-issortth="1">'+label+arrow+'</th>';
+      return '<th style="cursor:pointer;white-space:nowrap;user-select:none'+(extra||"")+'" data-sortkey="'+key+'" data-issortth="1">'+label+arrow+'</th>';
     }
 
-    el("prodHead").innerHTML="<tr>"+
-      '<th style="position:sticky;left:0;background:var(--surface2);z-index:10;min-width:160px">Name</th>'+
-      sortTh("class_pct","GP1 Score","GP1 training class score")+
-      sortTh("vs_Company_rank","vs Company","Sort by performance vs median")+
-      visMetrics.map(function(m){return sortTh(m.k,m.label,m.tip);}).join("")+
-      "</tr>";
+    // Group header row
+    var grpMap={"📋":"Applications","🏦":"Loans","💵":"Volume","🛡️":"CPL"};
+    var grpSpans={};
+    COLS.forEach(function(c){ grpSpans[c.grp]=(grpSpans[c.grp]||0)+1; });
+    var grpHeaderHtml='<tr style="background:var(--navy2)">'+
+      '<th colspan="3" style="position:sticky;left:0;z-index:11;background:var(--navy2)"></th>';
+    var lastGrp=null;
+    COLS.forEach(function(c){
+      if(c.grp!==lastGrp){
+        grpHeaderHtml+='<th colspan="'+grpSpans[c.grp]+'" style="text-align:center;font-size:.7rem;color:var(--muted);border-left:1px solid var(--border)">'+c.grp+' '+grpMap[c.grp]+'</th>';
+        lastGrp=c.grp;
+      }
+    });
+    grpHeaderHtml+='</tr>';
 
-    // Wire sort clicks
+    el("prodHead").innerHTML=grpHeaderHtml+
+      '<tr>'+
+      '<th style="position:sticky;left:0;background:var(--surface2);z-index:10;min-width:150px">Name</th>'+
+      sortTh("class_pct","GP1 Score")+
+      sortTh("vs_Company_rank","vs Company")+
+      COLS.map(function(c,i){
+        var borderL=i===0||COLS[i-1].grp!==c.grp?";border-left:1px solid var(--border)":"";
+        return sortTh(c.k,c.label,borderL);
+      }).join("")+
+      '</tr>';
+
     el("prodHead").querySelectorAll("[data-issortth]").forEach(function(th){
       th.addEventListener("click",function(){ APP.sortProd(th.dataset.sortkey); });
     });
 
-    el("prodBody").innerHTML=rows.map(function(row){
+    // Wire tier filter clicks via delegation
+    el("prodBanner").querySelectorAll("[data-tierclick]").forEach(function(tile){
+      tile.addEventListener("click",function(){
+        var key=tile.getAttribute("data-tierfilter");
+        if(key) APP.filterProdTier(key);
+      });
+    });
+    var cpfBtn=document.getElementById("clearProdFilterBtn");
+    if(cpfBtn) cpfBtn.addEventListener("click",function(){ APP.clearProdFilter(); });
+
+    el("prodBody").innerHTML=filtered.map(function(row){
       var stu=row.stu,pm=row.pm,pct=row.pct,tier=row.tier;
       var pColor=pct>=0.80?"#10b981":pct>=0.60?"#38bdf8":"#ef4444";
+      var vsPill='<span style="background:'+tier.bg+';color:'+tier.color+';border:1px solid '+tier.color+'44;border-radius:50px;padding:2px 9px;font-size:.7rem;font-weight:700;white-space:nowrap">'+tier.short+'</span>';
 
-      // vs Company pill
-      var vsPill=pm&&row.vsKey
-        ?'<span style="background:'+tier.bg+';color:'+tier.color+';border:1px solid '+tier.color+'44;border-radius:50px;padding:2px 10px;font-size:.72rem;font-weight:700">'+tier.label+'</span>'
-        :'<span style="color:var(--muted);font-size:.78rem">No data</span>';
+      var dataCells=COLS.map(function(c,i){
+        var borderL=i===0||COLS[i-1].grp!==c.grp?";border-left:1px solid var(--border)":"";
+        if(!pm||!pm.raw||pm.raw[c.k]===undefined||pm.raw[c.k]==="")
+          return '<td style="color:var(--muted);text-align:center'+borderL+'">—</td>';
 
-      var metricCells=visMetrics.map(function(m){
-        if(!pm||!pm.raw||pm.raw[m.k]===undefined||pm.raw[m.k]==="")
-          return '<td style="color:var(--muted);text-align:center">—</td>';
-        var raw=parseFloat(pm.raw[m.k])||0;
-        // For pct metrics color based on 100% = median
-        var c;
-        if(m.fmt==="pct"){
-          c=raw>=120?"#10b981":raw>=90?"#f59e0b":raw>=70?"#f97316":"#ef4444";
+        // CPL N/A handling
+        if(c.k==="CPL"&&pm.raw["CPL_Note"]&&pm.raw["CPL_Note"].indexOf("N/A")>=0)
+          return '<td style="color:var(--muted);font-size:.75rem;text-align:center'+borderL+'">N/A</td>';
+
+        var raw=parseFloat(pm.raw[c.k])||0;
+        var color;
+        if(c.fmt==="pct"){
+          color=raw>=120?"#10b981":raw>=90?"#f59e0b":raw>=70?"#f97316":"#ef4444";
+        } else if(c.k==="CPL"){
+          // CPL: higher is better vs median 1.75
+          var med=parseFloat((pm.raw[c.medianK])||1.75);
+          color=raw>=med*1.2?"#10b981":raw>=med*0.9?"#f59e0b":raw>=med*0.7?"#f97316":"#ef4444";
         } else {
-          var ratio=maxes[m.k]?raw/maxes[m.k]:0;
-          c=ratio>=0.75?"#10b981":ratio>=0.50?"#38bdf8":ratio>=0.25?"#f59e0b":"#ef4444";
+          var ratio=maxes[c.k]?raw/maxes[c.k]:0;
+          color=ratio>=0.75?"#10b981":ratio>=0.50?"#38bdf8":ratio>=0.25?"#f59e0b":"#ef4444";
         }
-        // Show median reference if available
-        var medianNote="";
-        if(m.medianRef&&pm.raw[m.medianRef]!==undefined){
-          medianNote='<div style="font-size:.68rem;color:var(--muted);margin-top:2px">median: '+fmtVal(null,pm.raw[m.medianRef])+'</div>';
+        var medNote="";
+        if(c.medianK&&pm.raw[c.medianK]!==undefined){
+          medNote='<div style="font-size:.65rem;color:var(--muted);line-height:1">med:'+fmtVal(c.fmt==="pct"?null:c.fmt,pm.raw[c.medianK])+'</div>';
         }
-        return '<td><div class="prod-bar-wrap">'+
-          '<div class="prod-bar-bg"><div class="prod-bar-fill" style="width:'+Math.min(100,Math.round(m.fmt==="pct"?Math.min(raw,200)/2:maxes[m.k]?raw/maxes[m.k]*100:0))+'%;background:'+c+'"></div></div>'+
-          '<span class="prod-val" style="color:'+c+'">'+fmtMetric(m,raw)+'</span>'+
-          '</div>'+medianNote+'</td>';
+        var barW=c.fmt==="pct"?Math.min(100,raw/2):(maxes[c.k]?Math.min(100,raw/maxes[c.k]*100):0);
+        return '<td style="'+borderL+'">'+
+          '<div style="display:flex;align-items:center;gap:.3rem">'+
+          '<div style="width:40px;height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;flex-shrink:0">'+
+          '<div style="height:100%;width:'+barW+'%;background:'+color+';border-radius:2px"></div></div>'+
+          '<span style="font-size:.82rem;font-weight:600;color:'+color+'">'+fmtVal(c.fmt,raw)+'</span>'+
+          '</div>'+medNote+'</td>';
       }).join("");
 
-      return "<tr>"+
+      return '<tr>'+
         '<td style="position:sticky;left:0;background:var(--surface);z-index:5;font-weight:600">'+stu.name+'</td>'+
         '<td><span class="pct-pill" style="background:'+pColor+'22;color:'+pColor+';border:1px solid '+pColor+'44">'+Math.round(pct*100)+'%</span></td>'+
         '<td>'+vsPill+'</td>'+
-        metricCells+
-        "</tr>";
-    }).join("")||'<tr><td colspan="20" class="empty">No students</td></tr>';
-
-
+        dataCells+'</tr>';
+    }).join("")||
+    '<tr><td colspan="20" class="empty">'+(filtered.length===0&&_prodFilterTier?"No students in this tier — click Show All to reset":"No data")+'</td></tr>';
   }
 
 
@@ -2162,6 +2209,8 @@ _loadScript("https://unpkg.com/firebase@10.8.0/firebase-app-compat.js", function
   wire("chgPwBtn", function(){ el("pwErr").style.display="none"; openModal("chgPwModal"); });
   wire("exportBtn", function(){ openModal("exportModal"); });
   wire("uploadProdBtn", function(){ el("prodFileInput").click(); });
+
+  // view toggle removed
   wire("clearProdBtn", clearProductionData);
   el("prodFileInput").addEventListener("change", function(e){
     var file = e.target.files[0];
