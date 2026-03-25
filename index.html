@@ -352,7 +352,7 @@ body::after{content:'';position:fixed;top:-300px;left:50%;width:900px;height:900
       <div class="row-between">
         <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
           <span style="color:var(--muted);font-size:.85rem" id="rosterInfo"></span>
-          <button class="sort-btn" id="sortGradeBtn" onclick="toggleSort()">⇅ Sort by Grade</button>
+          <button class="sort-btn" id="sortGradeBtnStatic">⇅ Sort: A→Z</button>
         </div>
         <button class="add-btn" id="addStudentBtn">+ Add Student</button>
       </div>
@@ -699,7 +699,7 @@ _loadScript("https://unpkg.com/firebase@10.8.0/firebase-app-compat.js", function
   var activeClassId = "c1";
   var adminPw = "admin2026";
   var _editStuId = null, _editAssignId = null, _editSesId = null, _curStuId = null;
-  var _sortByGrade = false;
+  var _sortMode = 'alpha'; // 'alpha' | 'grade'
   var _saveTimer = null;
 
   // ===================== HELPERS =====================
@@ -974,8 +974,13 @@ _loadScript("https://unpkg.com/firebase@10.8.0/firebase-app-compat.js", function
     var assigns=getAssigns(); var sessions=getSessions();
     var students=getStudents().slice();
     var rankMap=getRankInfo(students,assigns);
-    if(_sortByGrade) students.sort(function(a,b){ return getPct(b,assigns)-getPct(a,assigns); });
-    el("rosterHead").innerHTML='<tr><th>Name</th><th>Branch</th>'+
+    if(_sortMode === 'grade') {
+      students.sort(function(a,b){ return getPct(b,assigns)-getPct(a,assigns); });
+    } else {
+      students.sort(function(a,b){ return a.name.localeCompare(b.name); });
+    }
+    var sortLabel = _sortMode==='grade' ? '⇅ Sort: A→Z' : '⇅ Sort: Grade';
+    el("rosterHead").innerHTML='<tr><th>Name <button class="sort-btn active" id="sortGradeBtn" style="font-size:.7rem">'+sortLabel+'</button></th><th>Branch</th>'+
       assigns.map(function(a){ return'<th>'+a.name+'<br><span style="font-weight:400;color:var(--muted2)">/'+a.max+'</span></th>'; }).join("")+
       '<th>Total</th><th>%</th><th>Abs</th><th>Pass</th><th>PW</th><th></th></tr>';
     el("rosterBody").innerHTML=students.map(function(stu){
@@ -1008,6 +1013,9 @@ _loadScript("https://unpkg.com/firebase@10.8.0/firebase-app-compat.js", function
     document.querySelectorAll(".name-link").forEach(function(e){
       e.addEventListener("click",function(){ APP.openStuDetail(e.dataset.id); });
     });
+    // Wire dynamic sort button in header
+    var dynSort = el("rosterHead").querySelector("#sortGradeBtn");
+    if(dynSort) dynSort.addEventListener("click", window.toggleSort);
   }
 
   // ===================== ATTENDANCE =====================
@@ -1675,7 +1683,14 @@ _loadScript("https://unpkg.com/firebase@10.8.0/firebase-app-compat.js", function
     e.target.value = "";
   });
   wire("pwSaveBtn", savePassword);
-  wire("sortGradeBtn", function(){ _sortByGrade=!_sortByGrade; renderRoster(); });
+  // Sort button wired via renderRoster (dynamic header)
+  window.toggleSort = function(){
+    _sortMode = _sortMode === 'alpha' ? 'grade' : 'alpha';
+    renderRoster();
+  };
+  // Also wire the static button in the row-between bar (above the table)
+  var staticSortBtn = el("sortGradeBtn");
+  var staticSortBtn = el("sortGradeBtnStatic"); if(staticSortBtn) staticSortBtn.addEventListener("click", window.toggleSort);
 
   el("adminLink").onclick=function(){ el("passwordInput").placeholder="Enter admin password"; el("passwordInput").focus(); };
   el("passwordInput").onkeydown=function(e){ if(e.key==="Enter") handleLogin(); };
